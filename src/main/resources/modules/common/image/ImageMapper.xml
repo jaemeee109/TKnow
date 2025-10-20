@@ -20,14 +20,20 @@
        NOW(), NOW())
   </insert>
 
-  <update id="updateImageMeta">
-    UPDATE image
-       SET is_primary = #{isPrimary},
-           img_sort   = #{imageSort},
-           img_type   = #{imageType},
-           updated_at = NOW()
-     WHERE img_uuid   = #{imageUuid}
-  </update>
+  <update id="updateImageMeta" parameterType="ticketnow.modules.common.domain.ImageVO">
+  UPDATE image
+  <set>
+    is_primary = CASE WHEN #{isPrimary} IS NULL THEN 0 ELSE #{isPrimary} END,
+    <if test="imgSort != null">
+      img_sort = #{imgSort},
+    </if>
+    <if test="imgType != null">
+      img_type = #{imgType},
+    </if>
+    updated_at = NOW()
+  </set>
+  WHERE img_uuid = #{imgUuid}
+</update>
 
   <delete id="deleteImageByUuid">
     DELETE FROM image WHERE img_uuid = #{imageUuid}

@@ -75,21 +75,30 @@ public class FileService {
             }
         }
 
-        // 2) 기존 이미지 메타 수정/삭제
+       
+     // 2) 기존 이미지 메타 수정/삭제
         if (req.getExistingImages() != null) {
             for (ExistingImageDTO ei : req.getExistingImages()) {
                 if (ei.isDelete()) {
                     imageMapper.deleteImageByUuid(ei.getImageUuid());
                 } else {
+                    // null 방어
+                    Boolean primary = ei.getIsPrimary();
+                    Boolean safePrimary = (primary != null) ? primary : Boolean.FALSE; // null -> false(0)
+                    Integer safeSort = ei.getImageSort(); // null 허용(미지정이면 변경 안할 수도)
+                    String safeType = ei.getImageType();  // null 허용
+
+                    // ⚠️ 매퍼 XML의 '?' 순서: is_primary, img_sort, img_type, img_uuid
                     imageMapper.updateImageMeta(
-                            ei.getImageUuid(),
-                            ei.getIsPrimary(),
-                            ei.getImageSort(),
-                            ei.getImageType()
+                            safePrimary,     // is_primary = ?
+                            safeSort,        // img_sort   = ?
+                            safeType,        // img_type   = ?
+                            ei.getImageUuid()// WHERE img_uuid = ?
                     );
                 }
             }
         }
+
 
         // 3) 최종 목록 반환 (board > member > ticket 우선)
         if (req.getBoardId() != null)  return imageMapper.selectImagesByBoard(req.getBoardId());

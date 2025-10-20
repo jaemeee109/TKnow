@@ -17,10 +17,12 @@ public interface ImageMapper {
     int insertImage(ImageVO vo);
 
     // 메타데이터만 업데이트
-    int updateImageMeta(@Param("imageUuid") String imageUuid,
-                        @Param("isPrimary") Boolean isPrimary,
-                        @Param("imageSort") Integer imageSort,
-                        @Param("imageType") String imageType);
+    int updateImageMeta(
+            @Param("isPrimary") Boolean isPrimary,
+            @Param("imgSort") Integer imgSort,
+            @Param("imgType") String imgType,
+            @Param("imgUuid") String imgUuid
+            );
 
     // PK(UUID)로 삭제 
     int deleteImageByUuid(@Param("imageUuid") String imageUuid);

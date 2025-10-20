@@ -7,7 +7,7 @@ import ticketnow.modules.board.domain.BoardVO;
 import ticketnow.modules.member.domain.MemberVO;
 import ticketnow.modules.ticket.domain.TicketVO;
 import ticketnow.modules.common.constant.ImageType;
-
+import ticketnow.modules.board.domain.ReplyVO; 
 @Getter
 @Setter
 @Builder
@@ -27,4 +27,5 @@ public class ImageVO extends BaseVO {
     private BoardVO board;         // 게시글번호 (FK)
     private MemberVO member;       // 회원번호 (FK)
     private TicketVO ticket;       // 티켓번호 (FK)
+    private ReplyVO reply; 		  // 댓글번호 (FK)
 }

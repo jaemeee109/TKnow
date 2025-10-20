@@ -20,9 +20,14 @@ public class ImageListDTO {
     // 티켓 번호 (ticket.ticket_id FK) 
     private Long ticketId;
 
+    // 댓글 번호 (reply.reply_id FK)
+    private Long replyId;    
+    
     // 새로 업로드할 이미지 목록 
     private List<NewImageDTO> newImages;
 
     // 기존 이미지(메타 수정/삭제용) 목록 
     private List<ExistingImageDTO> existingImages;
+    
+    
 }

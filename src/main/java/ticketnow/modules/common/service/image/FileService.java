@@ -11,6 +11,7 @@ import ticketnow.modules.common.dto.image.ImageListDTO;
 import ticketnow.modules.common.dto.image.NewImageDTO;
 import ticketnow.modules.common.mapper.image.ImageMapper;
 import ticketnow.modules.board.domain.BoardVO;
+import ticketnow.modules.board.domain.ReplyVO;
 import ticketnow.modules.member.domain.MemberVO;
 import ticketnow.modules.ticket.domain.TicketVO;
 
@@ -52,6 +53,8 @@ public class FileService {
                         .imageSort(ni.getImageSort())
                         .isPrimary(Boolean.TRUE.equals(ni.getIsPrimary()))
                         .build();
+                
+                
 
             
              // 소유자 FK 모두 설정 가능 (NULL 아닌 경우 각각 설정)
@@ -64,6 +67,9 @@ public class FileService {
                 if (req.getTicketId() != null)
                     vo.setTicket(TicketVO.builder().ticketId(req.getTicketId()).build());
 
+                if (req.getReplyId() != null) 
+                    vo.setReply(ReplyVO.builder().replyId(req.getReplyId()).build());
+              
 
                 imageMapper.insertImage(vo);
             }

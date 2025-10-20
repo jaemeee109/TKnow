@@ -53,6 +53,12 @@
      WHERE ticket_id = #{ticketId}
      ORDER BY is_primary DESC, img_sort ASC, created_at ASC
   </select>
+  
+    <select id="selectImagesByReply" resultType="ticketnow.modules.common.domain.ImageVO">
+    SELECT * FROM image
+     WHERE reply_id = #{replyId}
+     ORDER BY is_primary DESC, img_sort ASC, created_at ASC
+  </select>
 
   <select id="selectPrimaryImageByTicket" resultType="ticketnow.modules.common.domain.ImageVO">
     SELECT *

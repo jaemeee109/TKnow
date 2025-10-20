@@ -29,6 +29,9 @@ public interface ImageMapper {
     List<ImageVO> selectImagesByBoard(@Param("boardId") Long boardId);
     List<ImageVO> selectImagesByMember(@Param("memberId") String memberId);
     List<ImageVO> selectImagesByTicket(@Param("ticketId") Long ticketId);
+    
+    // 댓글 이미지 조회
+    List<ImageVO> selectImagesByReply(@Param("replyId") Long replyId);
 
     // 티켓의 대표 이미지 1건 조회 
     ImageVO selectPrimaryImageByTicket(@Param("ticketId") Long ticketId);

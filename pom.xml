@@ -70,6 +70,21 @@
       <artifactId>jstl</artifactId>
       <version>1.2</version>
     </dependency>
+    
+    <!-- Bean Validation (JSR 380) 구현체: MyBatis 프로젝트에서도 사용 가능 -->
+		<dependency>
+		  <groupId>org.hibernate.validator</groupId>
+		  <artifactId>hibernate-validator</artifactId>
+		  <version>6.2.5.Final</version>
+		</dependency>
+		
+		<!-- 메시지 보간(에러 메시지 포맷)에 필요한 EL 구현 -->
+		<dependency>
+		  <groupId>org.glassfish</groupId>
+		  <artifactId>javax.el</artifactId>
+		  <version>3.0.1-b08</version>
+		</dependency>
+
 
     <!-- Lombok -->
     <dependency>

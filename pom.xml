@@ -28,6 +28,11 @@
 
     <!-- Lombok 사용 -->
     <lombok.version>1.18.34</lombok.version>
+    
+    <!-- JWT & Spring Security 버전 (Spring 5.3.x 호환) -->
+    <spring.security.version>5.8.12</spring.security.version>
+	<jjwt.version>0.11.5</jjwt.version>
+
   </properties>
 
   <dependencies>
@@ -147,6 +152,49 @@
       <artifactId>jackson-datatype-jsr310</artifactId>
       <version>2.17.2</version>
     </dependency>
+    
+    <!-- JDK 17 환경에서 PostConstruct, PreDestroy 등 Jakarta Annotation 지원 -->
+	<dependency>
+	    <groupId>jakarta.annotation</groupId>
+	    <artifactId>jakarta.annotation-api</artifactId>
+	    <version>2.1.1</version>
+	</dependency>
+    
+    <!-- ==========시큐리티 설정========== -->
+	    <!-- Spring Security (Core/Web/Config) -->
+		<dependency>
+		  <groupId>org.springframework.security</groupId>
+		  <artifactId>spring-security-core</artifactId>
+		  <version>${spring.security.version}</version>
+		</dependency>
+		<dependency>
+		  <groupId>org.springframework.security</groupId>
+		  <artifactId>spring-security-web</artifactId>
+		  <version>${spring.security.version}</version>
+		</dependency>
+		<dependency>
+		  <groupId>org.springframework.security</groupId>
+	  <artifactId>spring-security-config</artifactId>
+	  <version>${spring.security.version}</version>
+	</dependency>
+		<!-- JSON Web Token (JJWT: API/Impl/Jackson) -->
+		<dependency>
+		  <groupId>io.jsonwebtoken</groupId>
+		  <artifactId>jjwt-api</artifactId>
+		  <version>${jjwt.version}</version>
+		</dependency>
+		<dependency>
+		  <groupId>io.jsonwebtoken</groupId>
+		  <artifactId>jjwt-impl</artifactId>
+		  <version>${jjwt.version}</version>
+		  <scope>runtime</scope>
+		</dependency>
+		<dependency>
+		  <groupId>io.jsonwebtoken</groupId>
+		  <artifactId>jjwt-jackson</artifactId>
+		  <version>${jjwt.version}</version>
+		  <scope>runtime</scope>
+		</dependency>
 
     <!-- ======================= 테스트 코드용 =========================== -->
     <dependency>

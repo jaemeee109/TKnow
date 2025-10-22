@@ -28,14 +28,16 @@
     <url-pattern>/*</url-pattern>
   </filter-mapping>
 
-  <!-- Spring ContextLoader (root-context.xml) -->
-  <context-param>
-    <param-name>contextConfigLocation</param-name>
-    <param-value>/WEB-INF/spring/root-context.xml</param-value>
-  </context-param>
-  <listener>
-    <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
-  </listener>
+ <!-- Spring ContextLoader (root + security) -->
+	<context-param>
+	  <param-name>contextConfigLocation</param-name>
+	  <!-- 공백으로 여러 개 지정 -->
+	  <param-value>/WEB-INF/spring/root-context.xml /WEB-INF/spring/security-context.xml</param-value>
+	</context-param>
+	<listener>
+	  <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+	</listener>
+
 
   <!-- Spring MVC DispatcherServlet -->
   <servlet>
@@ -55,8 +57,29 @@
 		  <!-- 임계값 (바로 디스크에 씀) -->
 		  <file-size-threshold>0</file-size-threshold>
 		</multipart-config>
-		    
   </servlet>
+  
+  <!-- ================== 시큐리티 ================== -->
+  <!-- 1) Spring Security DelegatingFilterProxy -->
+	<filter>
+	  <filter-name>springSecurityFilterChain</filter-name>
+	  <filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
+	</filter>
+	<filter-mapping>
+	  <filter-name>springSecurityFilterChain</filter-name>
+	  <url-pattern>/*</url-pattern>
+	</filter-mapping>
+	
+	<!-- 2) CORS  -->
+	<filter>
+	  <filter-name>corsFilter</filter-name>
+	  <filter-class>org.springframework.web.filter.CorsFilter</filter-class>
+	</filter>
+	<filter-mapping>
+	  <filter-name>corsFilter</filter-name>
+	  <url-pattern>/*</url-pattern>
+	</filter-mapping>
+	  
   <servlet-mapping>
     <servlet-name>appServlet</servlet-name>
     <url-pattern>/</url-pattern>

@@ -36,11 +36,23 @@
     </property>
     
       <!--  XML 매퍼 자동 로딩 -->
-  <property name="mapperLocations" value="classpath*:**/*Mapper.xml"/>
+   <property name="mapperLocations">
+	  <array>
+	    <value>classpath*:/core/**/*.xml</value>
+	    <value>classpath*:/modules/**/*.xml</value>
+	  </array>
+	</property>
+
   
     <!-- 타입 별칭/핸들러 패키지 -->
-    <property name="typeAliasesPackage" value="ticketnow.modules.**.domain,ticketnow.core.**.domain"/>
-  </bean>
+      <property name="typeAliasesPackage"
+            value="ticketnow.core.auth.domain,
+                   ticketnow.modules.member.domain,
+                   ticketnow.modules.board.domain,
+                   ticketnow.modules.order.domain,
+                   ticketnow.modules.pay.domain,
+                   ticketnow.modules.ticket.domain"/>
+</bean>
 
   <!-- MyBatis SqlSessionTemplate -->
   <bean id="sqlSessionTemplate" class="org.mybatis.spring.SqlSessionTemplate">

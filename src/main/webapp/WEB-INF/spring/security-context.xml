@@ -99,22 +99,38 @@
      use-expressions="true"> 
         <!-- create-session="stateless: 서버 세션을 만들지 않음(REST/JWT 권장) -->
         <!-- use-expressions="true" : 인증은 됐지만 권한 부족 시 403 핸들러 -->
-    <cors configuration-source-ref="corsSource"/>  <!-- 위에서 정의한 CORS 정책을 보안 체인에 적용 -->
     <csrf disabled="true"/>  <!-- CSRF 비활성화: 폼 세션 대신 토큰 방식 사용 -->
 
-	<!-- ========================= 접근권한 설정  ========================= -->
+	<!-- 403 권한부족 응답 핸들러 연결 -->
+	<access-denied-handler ref="jwtAccessDeniedHandler"/>
+	<!-- =================================== 접근권한 설정  =================================== -->
    
     <!-- 전채공개 URL   -->
     <intercept-url pattern="/auth/**" access="permitAll"/>  <!-- 로그인/토큰발급용 -->
     
-	<!--  URL별 접근권한 -->
-	<!--예시) <intercept-url pattern="/board/delete/**" access="hasAnyRole('ADMIN','USER')"/> -->
-        
-    <!-- 관리자 전용 -->
-    <!--예시) <intercept-url pattern="/admin/**" access="hasRole('ADMIN')"/> -->
+		<!-- ============================ Board ============================ -->
+		<!-- 회원이 자기 문의를 다루는 엔드포인트: /boards/**  ->  인증 필요 -->
+		<intercept-url pattern="/boards/**" access="isAuthenticated()"/>
+		
+		<!-- 관리자 전용 댓글/조회: /admin/boards/**  -> ADMIN만 -->
+		<intercept-url pattern="/admin/boards/**" access="hasRole('ADMIN')"/>
+		
+		
+		<!-- ============================ Orders ============================ -->
+		<!-- 주문 생성/조회/수정은 로그인 사용자만 -->
+		<intercept-url pattern="/orders/**" access="hasAnyRole('USER','ADMIN')"/>
+		
+		
+		<!-- ============================ Pay ============================ -->
+		<!-- 결제 승인/조회 등도 로그인 사용자만 -->
+		<intercept-url pattern="/pay/**" access="hasAnyRole('USER','ADMIN')"/>
     
-     <!-- 그 외는 인증 필요 -->
-    <intercept-url pattern="/**" access="isAuthenticated()"/> <!-- JWT 유효해야 통과 -->    
+    
+	     <!-- 그 외는 인증 필요 -->
+	    <intercept-url pattern="/**" access="isAuthenticated()"/> <!-- JWT 유효해야 통과 -->    
+    
+    
+    
     
 	<!-- ========================= 접근권한 설정 종료  ========================= -->
     <!-- 사용자 정의 JWT 필터 삽입 -->
@@ -122,5 +138,6 @@
        <custom-filter ref="jwtAuthenticationFilter" before="FORM_LOGIN_FILTER"/>
 
   	</http>
-
+  	
+	<global-method-security pre-post-annotations="enabled"/>
 </beans:beans>

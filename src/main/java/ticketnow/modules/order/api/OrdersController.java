@@ -1,9 +1,13 @@
 package ticketnow.modules.order.api;
 
-import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
 
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.*;
 import ticketnow.modules.common.dto.paging.PageRequestDTO;
 import ticketnow.modules.common.dto.paging.PageResponseDTO;
 import ticketnow.modules.order.dto.pay.PayPageDTO;
@@ -13,7 +17,6 @@ import ticketnow.modules.order.dto.receive.ReceiveOptionSubmitDTO;
 import ticketnow.modules.order.dto.OrdersListItemDTO;
 import ticketnow.modules.order.dto.OrdersDetailDTO;
 import ticketnow.modules.order.service.OrdersService;
-import lombok.extern.slf4j.Slf4j;
 
 // 주문(Order) API
 @Slf4j
@@ -23,8 +26,14 @@ import lombok.extern.slf4j.Slf4j;
 public class OrdersController {
 
     private final OrdersService ordersService;
+    
+    private String currentMemberId() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        return (auth != null) ? String.valueOf(auth.getPrincipal()) : null;
+    }
 
     // 수령방법 선택 페이지 데이터 조회
+    @PreAuthorize("hasAnyRole('USER','ADMIN')")
     @GetMapping("/{ordersId}/receive-option")
     public ResponseEntity<ReceiveOptionPageDTO> getReceiveOptionPage(@PathVariable Long ordersId,
     		 @RequestHeader(value="X-Request-Id", required=false) String requestId) { // 트래킹용 요청 헤더
@@ -35,14 +44,17 @@ public class OrdersController {
     // 수령방법 저장
     // 현재 스키마에 수령방법 컬럼이 없으므로, DB 저장 없이 OK만 반환
     // 결제 직전 페이지에서 선택한 수령방법은 Pay 준비 요청과 함께 전달
+    @PreAuthorize("hasAnyRole('USER','ADMIN')")
     @PostMapping("/{ordersId}/receive-option")
     public ResponseEntity<Void> submitReceiveOption(@PathVariable Long ordersId,
 										    	    @RequestBody ReceiveOptionSubmitDTO req,
 										            @RequestHeader(value="X-Request-Id", required=false) String requestId) {
-    	 log.info("[POST] /orders/{}/receive-option | X-Request-Id={} | body={}", ordersId, requestId, req);								       
+    	
+    	log.info("[POST] /orders/{}/receive-option | X-Request-Id={} | body={}", ordersId, requestId, req);								       
         return ResponseEntity.ok().build();
     }
 
+    @PreAuthorize("hasAnyRole('USER','ADMIN')")
     // 결제하기 페이지 데이터 조회
     @GetMapping("/{ordersId}/pay-page")
     public ResponseEntity<PayPageDTO> getPayPage(@PathVariable Long ordersId,
@@ -53,6 +65,7 @@ public class OrdersController {
 
     // 결제 준비(결제하기 버튼 클릭) → Pay 모듈로 넘길 준비
     // 응답으로 토큰/리다이렉트 정보 등을 내려주면 프론트가 Pay 모듈로 이동
+    @PreAuthorize("hasAnyRole('USER','ADMIN')")
     @PostMapping("/pay/ready")
     public ResponseEntity<String> readyToPay(@RequestBody PayReadySubmitDTO req,
     		  @RequestHeader(value="X-Request-Id", required=false) String requestId) {
@@ -67,12 +80,13 @@ public class OrdersController {
     // 구매내역 목록 (마이페이지 - 결제내역 리스트)
     // memberId는 로그인 세션/JWT에서 읽어오는 것이 보통이지만,
     // 여기서는 파라미터로 받도록 구성(팀 규칙에 맞게 변경 가능)
+    @PreAuthorize("hasAnyRole('USER','ADMIN')")
     @GetMapping
     public ResponseEntity<PageResponseDTO<OrdersListItemDTO>> getOrdersList(
-            @RequestParam String memberId,
             PageRequestDTO req, // page, size 자동 바인딩
             @RequestHeader(value="X-Request-Id", required=false) String requestId) { 
     	
+    	 String memberId = currentMemberId();
     	 log.info("[GET] /orders | memberId={} | page={} size={} | X-Request-Id={}",
                  memberId, req.getPage(), req.getSize(), requestId); // 목록 조회 로깅
     	 
@@ -80,6 +94,7 @@ public class OrdersController {
     }
 
     // 구매내역 상세
+    @PreAuthorize("hasAnyRole('USER','ADMIN')")
     @GetMapping("/{ordersId}")
     public ResponseEntity<OrdersDetailDTO> getOrdersDetail(@PathVariable Long ordersId,
     		 @RequestHeader(value="X-Request-Id", required=false) String requestId) {

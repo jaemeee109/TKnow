@@ -44,7 +44,7 @@ public class FileService {
 
                 // 1-2) VO 구성 (DB 스키마 컬럼과 자동 매핑)
                 ImageVO vo = ImageVO.builder()
-                		.imageUuid(UUID.randomUUID().toString())
+                      .imageUuid(UUID.randomUUID().toString())
                         .imageExt(getExt(file.getOriginalFilename()))
                         .orginName(file.getOriginalFilename())
                         .fileName(extractFileName(url))
@@ -99,11 +99,15 @@ public class FileService {
             }
         }
 
+
         // 3) 최종 목록 반환 (board > member > ticket 우선)
         if (req.getBoardId() != null)  return imageMapper.selectImagesByBoard(req.getBoardId());
         if (req.getMemberId() != null) return imageMapper.selectImagesByMember(req.getMemberId());
         if (req.getTicketId() != null) return imageMapper.selectImagesByTicket(req.getTicketId());
+        return Collections.emptyList();
     }
+
+    private String getExt(String original) {
         if (original == null) return "";
         int idx = original.lastIndexOf('.');
         return (idx >= 0) ? original.substring(idx + 1) : "";

@@ -36,7 +36,6 @@ public class MemberController {
      * 요청 바디: MemberCreateRequestDTO(JSON)
      * 응답 바디: 생성된 회원 정보(MemberResponseDTO)
      */
-    @PreAuthorize("hasAnyRole('USER','ADMIN')") // 로그인 사용자만 접근 (예시)
     @PostMapping
     public ResponseEntity<MemberResponseDTO> createMember(
             @Valid @RequestBody MemberCreateRequestDTO req,

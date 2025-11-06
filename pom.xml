@@ -135,7 +135,7 @@
     <!-- SLF4J → Log4j2 브리지 -->
     <dependency>
       <groupId>org.apache.logging.log4j</groupId>
-      <artifactId>log4j-slf4j2-impl</artifactId>
+      <artifactId>log4j-slf4j-impl</artifactId>
       <version>${log4j2.version}</version>
     </dependency>
     <!-- 웹앱 초기화/종료에 맞춘 관리 -->

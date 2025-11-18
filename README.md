@@ -7,9 +7,6 @@
 <p/>구조: 단일 모듈(Spring Legacy) + 도메인 단위 패키지 + Core 공용 모듈
 <p/>목표: 도메인별 독립 개발 / Core 중심 단방향 구조 / 중앙 통합 관리
 
-# Git Branch
-develop - 백엔드
-front - 프론트엔드
 
 # 역할 분담
 <p/> <b>이재은</b>

@@ -7,8 +7,12 @@ import ticketnow.modules.order.dto.pay.PayReadySubmitDTO;
 import ticketnow.modules.order.dto.receive.ReceiveOptionPageDTO;
 import ticketnow.modules.order.dto.OrdersListItemDTO;
 import ticketnow.modules.order.dto.OrdersDetailDTO;
+import ticketnow.modules.order.dto.OrdersCreateRequestDTO;
 
 public interface OrdersService {
+	
+	// 주문 생성
+	Long createOrder(String memberId, OrdersCreateRequestDTO req);
 
     // 티켓수령방법 선택 페이지 데이터
     ReceiveOptionPageDTO getReceiveOptionPage(Long ordersId);

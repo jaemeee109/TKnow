@@ -2,6 +2,8 @@ package ticketnow.modules.order.api;
 
 
 import lombok.RequiredArgsConstructor;
+import ticketnow.modules.order.dto.OrdersCreateRequestDTO;
+
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -31,6 +33,21 @@ public class OrdersController {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         return (auth != null) ? String.valueOf(auth.getPrincipal()) : null;
     }
+    
+    
+    //  주문 생성
+    @PostMapping
+    @PreAuthorize("hasAnyRole('USER','ADMIN')")
+    public ResponseEntity<Long> createOrder(@RequestBody OrdersCreateRequestDTO req) {
+
+        String memberId = currentMemberId();
+        log.info("[API] createOrder memberId={} req={}", memberId, req);
+
+        Long ordersId = ordersService.createOrder(memberId, req);
+        return ResponseEntity.ok(ordersId);
+    }
+
+    
 
     // 수령방법 선택 페이지 데이터 조회
     @PreAuthorize("hasAnyRole('USER','ADMIN')")

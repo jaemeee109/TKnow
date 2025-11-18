@@ -2,6 +2,7 @@ package ticketnow.modules.order.mapper;
 
 import java.util.List;
 
+
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
@@ -10,11 +11,24 @@ import ticketnow.modules.order.dto.receive.ReceiveOptionPageDTO;
 import ticketnow.modules.order.dto.OrdersListItemDTO;
 import ticketnow.modules.order.dto.OrdersDetailDTO;
 
+import org.apache.ibatis.annotations.Param;
+import ticketnow.modules.order.domain.OrdersVO;
+
+
 // 주문(Order) 조회 전용 Mapper
 //카멜<->스네이크 자동매핑: root-context.xml에서 mapUnderscoreToCamelCase=true 설정됨
 
 @Mapper
 public interface OrdersMapper {
+	
+	
+	 int insertOrders(OrdersVO orders); // 주문 생성 (orders 테이블)
+
+	 // 주문<-> 좌석 매핑 생성 (order_ticket 테이블)
+	 int insertOrderTicket(@Param("ordersId") Long ordersId,
+             @Param("seatId") Long seatId,
+             @Param("orderPrice") Integer orderPrice,
+             @Param("orderQuantity") Integer orderQuantity);
 
 	// 티켓수령방법 선택 페이지 (뷰) 데이터 조회 
     ReceiveOptionPageDTO selectReceiveOptionPage(@Param("ordersId") Long ordersId);

@@ -21,6 +21,9 @@ public class TicketCreateRequestDTO {
 
     @NotBlank(message = "공연장 명은 필수입니다.")
     private String venueName;
+    
+    @NotBlank(message = "카테고리는 필수입니다.")
+    private String category;
 
     private String venueAddress;
 

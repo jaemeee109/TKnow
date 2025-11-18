@@ -23,6 +23,9 @@ public class TicketVO extends BaseVO {
     private String ticketDetail;          // 상세설명
     private TicketCategory ticketCategory;// 카테고리
     private TicketStatus ticketStatus;    // 판매상태
+    
+    private LocalDateTime startAt;    // 공연 시작일시
+    private LocalDateTime endAt;      // 공연 종료일시
 
     // 첨부 이미지
     private List<ImageVO> image;

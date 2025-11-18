@@ -8,9 +8,9 @@
   <sql id="ticketDTOColumns">
     t.ticket_id     AS ticketId,
     t.ticket_title  AS title,
-    t.ticket_date   AS startAt,
+    t.start_at      AS startAt,
+    t.end_date      AS endAt,
     /* 스키마에 없는 컬럼은 NULL로 채워 DTO와 형식만 맞춤 */
-    NULL            AS endAt,
     NULL            AS venueName,
     NULL            AS venueAddress,
     t.ticket_stock  AS totalSeats,
@@ -23,15 +23,17 @@
   </sql>
 
   <!-- INSERT: Map 파라미터 기반, PK 자동 채번 -->
-  <insert id="insertTicketFromMap" parameterType="map"
+<insert id="insertTicketFromMap" parameterType="map"
           useGeneratedKeys="true" keyProperty="ticketId">
     INSERT INTO ticket (
-      ticket_title, ticket_date, ticket_price, ticket_stock,
+      ticket_title, ticket_date, start_at, end_date, ticket_price, ticket_stock,
       ticket_detail, ticket_category, ticket_status,
       created_at, updated_at
     ) VALUES (
       #{title},              /* req.title           */
-      #{startAt},            /* req.startAt         */
+      #{startAt},            /* req.startAt → 관람일 기본값 */
+      #{startAt},            /* req.startAt → 공연 시작일시 */
+      #{endAt},              /* req.endAt   → 공연 종료일시 */
       #{price},              /* req.price           */
       #{totalSeats},         /* req.totalSeats      */
       #{detail},             /* req.detail          */
@@ -40,6 +42,8 @@
       NOW(), NOW()
     )
   </insert>
+
+
 
   <!-- 단건 DTO 조회 -->
   <select id="selectTicketDTOById" parameterType="long"
@@ -66,11 +70,13 @@
   </select>
 
   <!-- 부분 수정(전달된 필드만 갱신) -->
-  <update id="updateTicketFromMap" parameterType="map">
+<update id="updateTicketFromMap" parameterType="map">
     UPDATE ticket
     <set>
       <if test="title != null">          ticket_title   = #{title},       </if>
       <if test="startAt != null">        ticket_date    = #{startAt},     </if>
+      <if test="startAt != null">        start_at       = #{startAt},     </if>
+      <if test="endAt != null">          end_date       = #{endAt},       </if>
       <if test="price != null">          ticket_price   = #{price},       </if>
       <if test="totalSeats != null">     ticket_stock   = #{totalSeats},  </if>
       <if test="detail != null">         ticket_detail  = #{detail},      </if>
@@ -80,6 +86,7 @@
     </set>
     WHERE ticket_id = #{ticketId}
   </update>
+
 
   <!-- 소프트 삭제 대체: 상태를 CLOSED로 전환 -->
   <update id="softDeleteTicket" parameterType="long">

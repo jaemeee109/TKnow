@@ -20,7 +20,29 @@
        pay p (pay_id, orders_id, pay_method, pay_status, ...)
   -->
 
-  <!-- 1) 수령방법 선택 페이지: 주문/좌석/공연/회원 요약 -->
+  <!-- 1) 주문 기본 정보 생성 (orders) -->
+  <insert id="insertOrders"
+          parameterType="ticketnow.modules.order.domain.OrdersVO"
+          useGeneratedKeys="true"
+          keyProperty="ordersId">
+    INSERT INTO orders
+      (member_id, orders_total_amount, orders_ticket_quantity, created_at, updated_at)
+    VALUES
+      (#{member.memberId}, #{ordersTotalAmount}, #{ordersTicketQuantity}, NOW(), NOW())
+  </insert>
+
+  <!-- 2) 주문-좌석 매핑  (order_ticket) -->
+  <insert id="insertOrderTicket">
+    INSERT INTO order_ticket
+      (orders_id, seat_id, order_price, order_quantity, created_at, updated_at)
+    VALUES
+      (#{ordersId}, #{seatId}, #{orderPrice}, #{orderQuantity}, NOW(), NOW())
+  </insert>
+
+
+
+
+  <!-- 3) 수령방법 선택 페이지: 주문/좌석/공연/회원 요약 -->
 	<select id="selectReceiveOptionPage"
 	        parameterType="long"
 	        resultType="ticketnow.modules.order.dto.receive.ReceiveOptionPageDTO">
@@ -70,7 +92,7 @@
     LIMIT 1
   </select>
 
-  <!-- 2) 결제하기 페이지: 수령 이후 결제 직전 화면 요약 -->
+  <!-- 4) 결제하기 페이지: 수령 이후 결제 직전 화면 요약 -->
 	<select id="selectPayPage"
 	        parameterType="long"
 	        resultType="ticketnow.modules.order.dto.pay.PayPageDTO">
@@ -111,7 +133,7 @@
     LIMIT 1
   </select>
 
-  <!-- 3) 구매내역 목록(회원별, 페이징) -->
+  <!-- 5) 구매내역 목록(회원별, 페이징) -->
   <select id="selectOrdersListByMember"
           resultType="ticketnow.modules.order.dto.OrdersListItemDTO">
     SELECT
@@ -134,7 +156,7 @@
     LIMIT #{limit} OFFSET #{offset}
   </select>
 
-  <!-- 4) 목록 카운트 -->
+  <!-- 6) 목록 카운트 -->
   <select id="countOrdersByMember" resultType="long">
     SELECT COUNT(DISTINCT o.orders_id)
     FROM orders o
@@ -142,7 +164,7 @@
     WHERE o.member_id = #{memberId}
   </select>
 
-  <!-- 5) 구매내역 상세 -->
+  <!-- 7) 구매내역 상세 -->
   <select id="selectOrdersDetail"
           parameterType="long"
           resultType="ticketnow.modules.order.dto.OrdersDetailDTO">

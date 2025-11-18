@@ -14,6 +14,8 @@ import ticketnow.core.auth.domain.TokenVO;
 import ticketnow.core.auth.domain.BlacklistTokenVO;
 import ticketnow.modules.member.constant.MemberRole;
 import ticketnow.modules.member.domain.MemberVO;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+
 
 import javax.sql.DataSource;
 import java.security.MessageDigest;
@@ -55,22 +57,38 @@ public class AuthController {
         );
        // 디버그: DB 조회 
         log.debug("[AUTH][LOGIN] DB row loaded for memberId={}", reqMemberId); 
-
+        
         String dbPw = (row.get("member_pw") != null) ? row.get("member_pw").toString() : ""; // DB 비번(필수)
-        dbPw = dbPw.startsWith("{noop}") ? dbPw.substring(6) : dbPw; // {noop} 제거(plain 저장 관례)
-        if (!dbPw.equals(req.getPassword())) {  // 비밀번호 일치 검사(샘플: 평문 비교)
-        	
-        	// 경고 로그
-        	 log.warn("[AUTH][LOGIN] 비밀번호 불일치 memberId={}", reqMemberId); 
-        	 
-            return ResponseEntity.status(401).body(Map.of( // 401 반환
-                    "status", 401, "error", "Unauthorized", "message", "아이디 또는 비밀번호가 올바르지 않습니다."
-            ));
-        }
-        
-      // 디버그 로그 : 패스
-        log.debug("[AUTH][LOGIN] 비밀번호 일치 memberId={}", reqMemberId); 
-        
+
+	     // 비밀번호 일치 검사
+	     BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+	
+	     
+	     boolean matched;
+	     if (dbPw.startsWith("{noop}")) { // {noop}: "암호화 안 하고 평문으로 저장했다는 표시용 prefix
+	         String plain = dbPw.substring(6);   // {noop}이후의 실제 평문 비밀번호 부분만 잘라냄
+	         matched = plain.equals(req.getPassword());
+	         							// DB 에 저장된 평문 비밀번호(plain)와 사용자가 입력한 비밀번호를
+	         							// 비교해서 같으면 true, 다르면 false를 넣는 코드 
+	     } else {
+	         // BCrypt 해시 비교
+	         matched = encoder.matches(req.getPassword(), dbPw);
+	     }
+	     
+	     if (!matched) { // false일 경우 로그인 실패로 처리
+	
+	         // 경고 로그
+	         log.warn("[AUTH][LOGIN] 비밀번호 불일치 memberId={}", reqMemberId);
+	
+	         return ResponseEntity.status(401).body(Map.of( // 401 반환
+	                 "status", 401, "error", "Unauthorized", "message", "아이디 또는 비밀번호가 올바르지 않습니다."
+	         ));
+	     }
+	
+	     // 디버그 로그 : 패스
+	     log.debug("[AUTH][LOGIN] 비밀번호 일치 memberId={}", reqMemberId);
+	
+	        
         
 
         String memberId = row.get("member_id").toString(); // 최종 인증된 memberId

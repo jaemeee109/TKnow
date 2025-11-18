@@ -52,7 +52,6 @@ public class TicketController {
 	 * (null 방지) → 바인딩 실패 시 400 - 예외: 서비스에서 존재하지 않으면 IllegalStateException → 글로벌
 	 * 핸들러로 404/400 매핑 권장
 	 */
-	@PreAuthorize("hasAnyRole('USER','ADMIN')")
 	@GetMapping("/{ticketId}")
 	public ResponseEntity<TicketResponseDTO> get(@PathVariable @NotNull Long ticketId) {
 		// 접근 로그(리소스 키)
@@ -68,7 +67,6 @@ public class TicketController {
 	 * 쿼리스트링 자동 바인딩) - 출력: PageResponseDTO<TicketResponseDTO>
 	 * (list/totalCount/page/size) - 정렬/검색 고도화는 PageRequestDTO 확장을 통해 추후 반영 가능
 	 */
-	@PreAuthorize("hasAnyRole('USER','ADMIN')")
 	@GetMapping
 	public ResponseEntity<PageResponseDTO<TicketResponseDTO>> list(@Valid PageRequestDTO pageReq) {
 		// 페이지 파라미터 진입 로그

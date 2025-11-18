@@ -49,12 +49,13 @@ public class TicketServiceImpl implements TicketService {
 		p.put("startAt", req.getStartAt());
 		p.put("endAt", req.getEndAt());
 		p.put("venueName", req.getVenueName());
+		p.put("category", req.getCategory());
 		p.put("venueAddress", req.getVenueAddress());
 		p.put("totalSeats", req.getTotalSeats());
 		p.put("remainingSeats", req.getTotalSeats()); // 디폴트: 남은 좌석 = 총좌석
 		p.put("price", req.getPrice());
 		p.put("ticketStatus", status.name());
-
+		
 		log.debug("[Ticket][CREATE][BEFORE] params={}", p); // INSERT 전 파라미터 확인
 		int rows = ticketMapper.insertTicketFromMap(p); // ★ keyProperty로 ticketId 채워짐
 		log.info("[Ticket][CREATE] rows={}, newId={}", rows, p.get("ticketId"));

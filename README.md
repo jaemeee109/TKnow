@@ -7,6 +7,10 @@
 <p/>구조: 단일 모듈(Spring Legacy) + 도메인 단위 패키지 + Core 공용 모듈
 <p/>목표: 도메인별 독립 개발 / Core 중심 단방향 구조 / 중앙 통합 관리
 
+# Git Branch
+develop - 백엔드
+front - 프론트엔드
+
 # 역할 분담
 <p/> <b>이재은</b>
 <p/> - Database·VO 설계, 공통(Image,Paging), Auth(JWT), Board , Order,Pay 모듈
@@ -14,6 +18,7 @@
 <p/> - 프론트엔드 전 영역 (UI/UX 포함) 
 <p/> <b>박희진</b>
 <p/> - Member· Ticket 모듈, GitHub (충돌 병합 및 버전관리)
+
   
 # 프로젝트 패키지 구조
 <p/>com.tknow.ticketnow
@@ -32,7 +37,8 @@
 <p/>   ├─ pay/                   # 결제, 환불
 <p/>   └─ board/                 # 게시판, 댓글
 
-# 브랜치 구조
+# 브랜치 구조 
+https://github.com/gomong0304/TKnow
 <p/>브랜치명	역할	주요 경로
 <p/>core	공용 설정 및 인증 관리 (Security/JWT, Exception, DTO 등)	/core/*
 <p/>feature/common	공용 엔티티 (BaseEntity, Image 등)	/modules/common/*
@@ -44,8 +50,10 @@
 <p/>feature/board	게시판 및 댓글	/modules/board/*
 <p/>develop	모든 feature 브랜치 통합 테스트용	전체
 <p/>main	배포용 안정 브랜치	전체
+<p/>front 프론트엔드 코드 전체
 
 # 브랜치 흐름 (단방향)
+<p/>front
 <p/>feature/*  ───▶  develop  ───▶  main
 <p/>     │
 <p/>     └──▶  core (read-only)     
@@ -57,6 +65,7 @@
 
 # 브랜치 관리 규칙
 <p/>구분 규칙
+<p/>front 프론트엔드 전용
 <p/>core 브랜치	직접 push 금지 / PR + 리뷰 2인 승인 필수
 <p/>feature/	자유롭게 생성 및 push 가능
 <p/>develop	CI 통과 후만 merge 가능

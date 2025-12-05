@@ -10,11 +10,13 @@
 
 # 역할 분담
 <p/> <b>이재은</b>
-<p/> - Database·VO 설계, 공통(Image,Paging), Auth(JWT), Board , Order,Pay 모듈
+<p/> - 백엔드 : Database·VO 설계, 공통(Image,Paging), Auth(JWT), Board , Order,Pay 모듈
+<p/> - 프론트엔드 : React
 <p/> <b>전혜진</b>
-<p/> - 프론트엔드 전 영역 (UI/UX 포함) 
+<p/> - 프론트엔드 React, Figma  
 <p/> <b>박희진</b>
-<p/> - Member· Ticket 모듈, GitHub (충돌 병합 및 버전관리)
+<p/> - 백엔드 : Member· Ticket 모듈
+<p/> -   GitHub (충돌 병합 및 버전관리)
 
   
 # 프로젝트 패키지 구조

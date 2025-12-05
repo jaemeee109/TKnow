@@ -1,22 +1,38 @@
-import React, { useState } from "react";
+// src/Ticket/TicketBuy4.jsx
+import React, { useState, useEffect, payload } from "react";
+import "../css/ticket.css";
 import "../css/style.css";
 import { Link, useParams, useLocation, useNavigate } from "react-router-dom";
 import Cons from "../images/cons.png";
+import api from "../api";
 
 export default function TicketBuy4() {
 	const { id } = useParams();
 	const location = useLocation();
 	const navigate = useNavigate();
+	const [userData, setUserData] = useState(null);
+
 	
 	// Buy3에서 넘어온 정보
 	const {
-		selectedSeat,
-		normalCount = 1,
-		discount1Count = 0,
-		discount2Count = 0,
-		discount3Count = 0,
-		totalPrice = 163000
+	  selectedSeat,
+	  normalCount,
+	  discount1Count,
+	  discount2Count,
+	  discount3Count,
+	  totalPrice,
+	  basePrice,
+	  serviceFee,
+	  deliveryFee,
+	  discountPrice,
+	  totalSeatCount,
+	  ticketDate,
+	  ticketVenue,
+	  ticketTitle, 
+	  ticketImage,
+	  cancelDate
 	} = location.state || {};
+	
 	
 	// 배송 방식
 	const [deliveryMethod, setDeliveryMethod] = useState("현장");
@@ -29,6 +45,57 @@ export default function TicketBuy4() {
 	const [phone3, setPhone3] = useState("");
 	const [email, setEmail] = useState("");
 	
+	useEffect(() => {
+	  const token = localStorage.getItem("accessToken");
+
+	  if (!token) {
+	    console.error("❌ accessToken 없음");
+	    return;
+	  }
+
+	  const parts = token.split(".");
+	  if (parts.length < 2) {
+	    console.error("❌ JWT 구조 이상:", parts);
+	    return;
+	  }
+
+	  let payload;
+	  try {
+	    payload = JSON.parse(atob(parts[1]));
+	  } catch (e) {
+	    console.error("❌ JWT 파싱 실패:", e);
+	    return;
+	  }
+
+	  console.log("JWT payload:", payload);
+
+	  // ⭐ 백엔드 JWTTokenProvider의 setSubject(memberId)
+	  //    → payload.sub = memberId
+	  const memberId = payload.sub;
+
+	  api
+	    .get(`/members/${memberId}`, {
+	      headers: { Authorization: `Bearer ${token}` },
+	    })
+	    .then((res) => {
+	      const data = res.data;
+	      setUserData(data);
+
+	      // 자동입력 세팅
+	      setName(data.memberName);
+	      setEmail(data.memberEmail);
+
+	      const phoneParts = data.phone?.split("-") || [];
+	      setPhone1(phoneParts[0] || "");
+	      setPhone2(phoneParts[1] || "");
+	      setPhone3(phoneParts[2] || "");
+	    })
+	    .catch((err) => {
+	      console.error(err);
+	    });
+	}, []);
+
+
 	const handleNext = () => {
 		if (!birthdate || birthdate.length !== 6) {
 			alert("생년월일을 정확히 입력해주세요 (6자리)");
@@ -42,16 +109,28 @@ export default function TicketBuy4() {
 			alert("이메일을 입력해주세요");
 			return;
 		}
-		
-		// Buy5로 데이터 전달
+
 		navigate(`/Ticket/Buy5/${id}`, {
 			state: {
+				// Buy3 → Buy4로 받은 모든 값들
 				selectedSeat,
 				normalCount,
 				discount1Count,
 				discount2Count,
 				discount3Count,
 				totalPrice,
+				basePrice,
+				serviceFee,
+				deliveryFee,
+				discountPrice,
+				totalSeatCount,
+				ticketDate,
+				ticketVenue,
+				ticketTitle,
+				ticketImage,
+				cancelDate,
+
+				// Buy4에서 새로 입력한 값들
 				deliveryMethod,
 				name,
 				birthdate,
@@ -60,6 +139,8 @@ export default function TicketBuy4() {
 			}
 		});
 	};
+	
+	
 
 	return (
 		<div className="ticket-buy-main">
@@ -180,10 +261,10 @@ export default function TicketBuy4() {
 								<div className="read-table">
 									<table>
 										<tbody>
-											<tr><th>장소</th><td>잠실 올림픽경기장</td></tr>
-											<tr><th>날짜</th><td>2025. 12. 05 ~ 2025. 12. 07</td></tr>
-											<tr><th>공연 시간</th><td>300 분</td></tr>
-											<tr><th>관람 연령</th><td>미취학 아동 입장 불가</td></tr>
+										<tr><th>공연명</th><td>{ticketTitle}</td></tr>
+											<tr><th>장소</th><td>{ticketVenue}</td></tr>
+											<tr><th>날짜</th><td>{ticketDate?.toLocaleString("ko-KR")}</td></tr>
+											
 										</tbody>
 									</table>
 								</div>
@@ -192,7 +273,7 @@ export default function TicketBuy4() {
 								<table className="ticket-buy-table2">
 									<tbody>
 									<strong className="ticket-buy-my">My 예매 정보 </strong><br/>
-										<tr><th>일시</th><td>2025 년 12 월 05 일  (금) 14:00</td></tr>
+										<tr><th>일시</th><td>{ticketDate?.toLocaleString("ko-KR")}</td></tr>
 										<tr>
 											<th>선택 좌석</th>
 											<td>
@@ -203,10 +284,10 @@ export default function TicketBuy4() {
 											</td>
 										</tr>
 										<tr><th>티켓 금액</th><td>{totalPrice?.toLocaleString()} 원</td></tr>
-										<tr><th>수수료</th><td>14,300 원</td></tr>
-										<tr><th>배송료</th><td>5,700 원</td></tr>
+										<tr><th>수수료</th><td>{serviceFee}</td></tr>
+										<tr><th>배송료</th><td>{deliveryFee}</td></tr>
 										<tr><th>할인</th><td>0 원</td></tr>
-										<tr><th>취소기한</th><td>2025 년 12 월 10 일 (수) 14:00</td></tr>		
+										<tr><th>취소기한</th><td>{cancelDate?.toLocaleString("ko-KR")}</td></tr>		
 										<tr><th>취소수수료</th><td>티켓 금액의 0 ~ 50 %</td></tr>									
 									</tbody>
 								</table>

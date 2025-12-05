@@ -1,4 +1,6 @@
-import React, { useState, useEffect } from "react";
+// src/Ticket/TicketBuy6.jsx
+import React, { useEffect, useState } from "react";
+import "../css/ticket.css";
 import "../css/style.css";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import Cons from "../images/cons.png";
@@ -6,77 +8,118 @@ import Ticket from "../images/ticket.png";
 import TKNOW_w from "../images/TKNOW_w.png";
 import { QRCodeCanvas } from "qrcode.react";
 import axios from "axios";
+import api from "../api";
+
+const API_BASE = (process.env.REACT_APP_API_BASE || api.defaults.baseURL || "").replace(/\/$/, "");
+
 
 export default function TicketBuy6() {
+
   const location = useLocation();
   const navigate = useNavigate();
-
   const [paymentInfo, setPaymentInfo] = useState(null);
-
+  
+  const normal = paymentInfo?.normalCount || 1;
+  const discount1 = paymentInfo?.discount1Count || 0;
+  const discount2 = paymentInfo?.discount2Count || 0;
+  const discount3 = paymentInfo?.discount3Count || 0;
+  const total = normal + discount1 + discount2 + discount3;
+  
   // 결제 정보 불러오기
   useEffect(() => {
     const info = location.state || JSON.parse(localStorage.getItem("lastPayment") || "{}");
+    console.log("결제 정보 로드:");
+    console.log("  normalCount:", info?.normalCount);
+    console.log("  discount1Count:", info?.discount1Count);
+    console.log("  discount2Count:", info?.discount2Count);
+    console.log("  discount3Count:", info?.discount3Count);
+    console.log("  전체 info:", info);
     setPaymentInfo(info);
   }, [location]);
 
-  // DB에 결제 정보 저장
-  useEffect(() => {
-    if (!paymentInfo || !paymentInfo.orderId) return;
+    // 주문 데이터 DB 저장 + 결제 데이터 DB 저장 + 창 닫기 / 홈 이동
+  const handleClose = async () => {
+    if (!paymentInfo?.seatIdList || paymentInfo.seatIdList.length === 0) {
+      alert("좌석이 선택되지 않았습니다.");
+      return;
+    }
+
+    // 수량 검증
+    if (total < 1) {
+      alert("주문 수량이 올바르지 않습니다.");
+      return;
+    }
 
     const token = localStorage.getItem("accessToken");
+    if (!token) {
+      alert("로그인이 필요합니다.");
+      navigate("/login");
+      return;
+    }
 
-    // 결제 정보 저장
-    const payData = {
-      ordersId: paymentInfo.orderId,
-      payMethod: paymentInfo.paymentMethod || "카카오페이",
-      payInstrument: paymentInfo.paymentInstrument || paymentInfo.paymentMethod,
-      agreeTerms: true,
+    // 💰 결제 금액 안전 계산 (Buy5에서 넘어온 값이 undefined 인 경우 대비)
+    const finalTotalPrice =
+      typeof paymentInfo.totalPrice === "number"
+        ? paymentInfo.totalPrice
+        : (paymentInfo.basePrice || 0) +
+          (paymentInfo.serviceFee || 0) +
+          (paymentInfo.deliveryFee || 0) -
+          (paymentInfo.discountPrice || 0);
+
+    // 백엔드 OrdersCreateRequestDTO 에 맞는 필드명
+    const orderData = {
+      ordersTotalAmount: finalTotalPrice,
+      ordersTicketQuantity: total,
+      seatIdList: paymentInfo.seatIdList,
     };
 
-    axios
-      .post("http://localhost:9090/ticketnow/pay/ready", payData, {
-        headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
-      })
-      .then(res => console.log("✅ 결제 정보 DB 저장 완료:", res.data))
-      .catch(err => console.error("❌ 결제 저장 실패:", err));
-  }, [paymentInfo]);
-
-  // 주문 정보 저장 후 나가기
-  const handleClose = async () => {
-    if (!paymentInfo) return;
-
-    const token = localStorage.getItem("accessToken");
+    console.log(" 주문 데이터 전송:", orderData);
 
     try {
-      await axios.post(
-        "http://localhost:9090/ticketnow/orders",
-        {
-          ticketId: paymentInfo.ticketId,
-          seatInfo: paymentInfo.seatInfo,
-          totalPrice: paymentInfo.totalPrice,
-          paymentMethod: paymentInfo.paymentMethod,
-          orderNumber: paymentInfo.orderId,
-          deliveryMethod: paymentInfo.deliveryMethod || "현장수령",
+      // 1) 주문 생성 (/orders)
+      const orderResponse = await api.post("/orders", orderData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
         },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
-      console.log("✅ 주문 데이터 DB 저장 완료!");
-    } catch (err) {
-      console.error("❌ 주문 저장 실패:", err);
-    }
+      });
 
-    // 창 닫기 혹은 홈으로 이동
-    if (window.opener) {
-      window.close();
-    } else {
-      navigate("/");
+      const createdOrdersId = orderResponse.data;
+      console.log(" 주문 생성 성공 ordersId =", createdOrdersId);
+
+      // 2) 결제 수단 확인 - 현재는 신용카드만 실제 가상 모듈 연동
+      if (paymentInfo.paymentMethod !== "신용카드") {
+        alert("현재는 신용카드 결제만 실제 처리됩니다.");
+        navigate("/member/myticket");
+        return;
+      }
+
+      // 3) 카드 결제 가상 모듈 호출용 DTO (CardApproveRequestDTO 매핑)
+      const cardApproveRequest = {
+        ordersId: createdOrdersId,
+        amount: finalTotalPrice,
+        cardCompany: paymentInfo.cardType || "BC카드",
+        maskedCardNo: paymentInfo.maskedCardNo || "1234-****-****-5678",
+        agreeTerms: true,
+      };
+
+      console.log(" 카드 결제 가상 모듈 호출:", cardApproveRequest);
+
+      const payResponse = await api.post("/pay/card/approve", cardApproveRequest, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      console.log("✅ 카드 결제 성공:", payResponse.data);
+
+      alert("예매가 완료되었습니다.");
+      navigate("/member/myticket");
+    } catch (error) {
+      console.error("❌ 주문/결제 처리 중 오류:", error);
+      alert("주문 저장에 실패했습니다. 다시 시도해주세요.");
     }
   };
+
 
   if (!paymentInfo || !paymentInfo.orderId) {
     return (
@@ -87,20 +130,23 @@ export default function TicketBuy6() {
     );
   }
 
-  // ✅ serialNumber 선언
   const serialNumber = paymentInfo.orderId;
 
   return (
     <div className="ticket-buy-main">
       <div className="ticket-buy-page">
-        {/* 상단 단계 표시 */}
         <div className="ticket-buy-top">
-          <button className="ticket-buy-button2">01 날짜 선택</button>
-          <button className="ticket-buy-button2">02 좌석 선택</button>
-          <button className="ticket-buy-button2">03 가격 선택</button>
-          <button className="ticket-buy-button2">04 배송 선택</button>
-          <button className="ticket-buy-button1">05 결제 완료</button>
-        </div>
+          <button className="ticket-buy-button2">01&nbsp;
+            <span className="ticket-buy-button-text1">날짜 선택</span></button>
+          <button className="ticket-buy-button2">02&nbsp;
+            <span className="ticket-buy-button-text1">좌석 선택</span></button>
+          <button className="ticket-buy-button2">03&nbsp;
+            <span className="ticket-buy-button-text1">가격 선택</span></button>
+          <button className="ticket-buy-button2">04&nbsp;
+            <span className="ticket-buy-button-text1">배송 선택</span></button>
+          <button className="ticket-buy-button1">05&nbsp;
+            <span className="ticket-buy-button-text1">결제하기</span></button>
+        </div><br />
 
         <br />
         <div className="ticket-buy-middle">
@@ -113,9 +159,11 @@ export default function TicketBuy6() {
                     <div className="ticket-buy6-table1">
                       <table>
                         <tbody>
-                          <tr>2025 투모로우바이투게더 단독 콘서트 &lt;#: 유화&gt;</tr><br />
-                          <tr>잠실 올림픽경기장</tr><br />
-                          <tr>2025. 12. 05 (금) 14:00 </tr><br />
+                          <tr>{paymentInfo.ticketTitle}</tr><br />
+                          <tr>{paymentInfo.ticketVenue}</tr><br />
+                          <tr>
+                            <td colSpan={3}>{paymentInfo?.ticketDate ? new Date(paymentInfo.ticketDate).toLocaleString("ko-KR") : ''}</td>
+                          </tr><br />
                         </tbody>
                       </table>
                     </div>
@@ -129,7 +177,7 @@ export default function TicketBuy6() {
                   <tbody>
                     <tr>
                       <th>예매일</th><td>｜</td>
-                      <td>{new Date(paymentInfo.paymentDate).toLocaleDateString("ko-KR")}</td>
+                      <td>{new Date(paymentInfo.paymentDate).toLocaleString("ko-KR")}</td>
                       <th>상태</th><td>｜</td>
                       <td style={{ color: "#FFA6C9", fontWeight: "bold" }}>결제 완료</td>
                       <th>결제수단</th><td>｜</td>
@@ -145,16 +193,16 @@ export default function TicketBuy6() {
                     <tr>
                       <th>예매 번호</th><td>｜</td><td>{paymentInfo.orderId}</td>
                       <th>배송</th><td>｜</td><td>{paymentInfo.deliveryMethod || "현장"}</td>
-                      <th>가격 등급</th><td>｜</td><td>일반 {paymentInfo.normalCount}매</td>
+                      <th>가격 등급</th><td>｜</td><td>일반 {normal}매</td>
                     </tr>
                     <tr>
                       <th>좌석번호</th><td>｜</td><td>{paymentInfo.seatInfo}</td>
-                      <th>가격</th><td>｜</td><td>{paymentInfo.totalPrice?.toLocaleString()} 원</td>
+                      <th>가격</th><td>｜</td><td>{paymentInfo.basePrice?.toLocaleString()} 원</td>
                       <th>취소 여부</th><td>｜</td><td>가능</td>
                     </tr>
                     <tr>
-                      <th>수수료</th><td>｜</td><td>14,300 원</td>
-                      <th>배송비</th><td>｜</td><td>5,700 원</td>
+                      <th>수수료</th><td>｜</td><td>{paymentInfo.serviceFee?.toLocaleString()} 원</td>
+                      <th>배송비</th><td>｜</td><td>{paymentInfo.deliveryFee?.toLocaleString()} 원</td>
                       <th>총 결제 금액</th><td>｜</td>
                       <td style={{ color: "#FFA6C9", fontWeight: "bold" }}>
                         {paymentInfo.totalPrice?.toLocaleString()} 원
@@ -166,7 +214,6 @@ export default function TicketBuy6() {
             </div>
           </div>
 
-          {/* 티켓 */}
           <div className="ticket-set-setting2">
             <div className="ticket-set-setting">
               <div className="read-set">
@@ -174,15 +221,13 @@ export default function TicketBuy6() {
                   <img src={Ticket} alt="티켓_사진" className="ticket-base-img" />
                   <img src={TKNOW_w} alt="티켓_사진" className="ticket-logow-img" />
                   <div className="ticket-buy6-text1">{serialNumber}</div>
-                  <div className="ticket-buy6-text2">
-                    2025 투모로우바이투게더 단독 콘서트 &lt; #: 유화 &gt;
-                  </div>
+                  <div className="ticket-buy6-text2">{paymentInfo.ticketTitle}</div>
 
                   <table className="ticket-buy6-table">
                     <tr><th>예매번호</th><td>｜</td><td>{paymentInfo.orderId}</td></tr>
                     <tr><th>좌석위치</th><td>｜</td><td>{paymentInfo.seatInfo}</td></tr>
-                    <tr><th>날짜</th><td>｜</td><td>2025. 12. 05 (금) 14:00 </td></tr>
-                    <tr><th>장소</th><td>｜</td><td>잠실 올림픽경기장</td></tr>
+                    <tr><th>날짜</th><td>｜</td><td colSpan={3}>{paymentInfo?.ticketDate ? new Date(paymentInfo.ticketDate).toLocaleString("ko-KR") : ''}</td></tr>
+                    <tr><th>장소</th><td>｜</td><td>{paymentInfo.ticketVenue}</td></tr>
                   </table>
 
                   <div className="ticket-qr-box">

@@ -1,3 +1,4 @@
+// src/main/Footer.jsx
 import React from "react";
 import "../css/style.css"
 

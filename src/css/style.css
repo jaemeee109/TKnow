@@ -1,3 +1,4 @@
+/*src/css/style.css*/
 * {
 	margin: 0;
 	padding: 0;
@@ -44,7 +45,7 @@
 	justify-content: start;
 }
 
-.join, .myPage  {
+.join, .myPage {
 	background-color: white;
 	color: #FFA6C9;
 	cursor: pointer;
@@ -106,14 +107,22 @@
 
 .TopList {
 	display: flex;
-	grid-template-columns: repeat(auto-fit, 250px);
+	flex-wrap: wrap;
 	gap: 35px;
 	justify-content: center;
 	min-width: 120px;
 }
+/* TopTK.jsx의 각 카드(.top) 한 장의 폭을 이미지 폭과 동일하게 고정 */
+.top {
+	width: 250px;              /* 이미지 폭과 동일하게 고정 */
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	text-align: center;        /* 번호, 제목, 장소, 날짜 모두 가운데 정렬 */
+}
 
 .TopList img {
-	width: 250px;
+	width: 100%;
 	height: auto;
 }
 
@@ -416,7 +425,6 @@
 	text-align: center;
 }
 
-
 .calendar-section1 {
 	width: 80%;
 	text-align: center;
@@ -618,10 +626,11 @@
 	border: 1px solid #D7D7D7;
 	padding: 20px;
 	border-radius: 20px;
-	width: 690px;
+	width: 541px;
 	right: 300px;
 	justify-content: center;
 	align-items: center;
+	margin-bottom: 20px;
 }
 
 .review-list-star {
@@ -642,49 +651,8 @@
 	font-weight: bold;
 }
 
-.ticket-buy-top {
-	width: 1440;
-	position: relative;
-	white-space: nowrap;
-}
 
-.ticket-buy-button1 {
-	padding: 40px;
-	width: 288px;
-	height: 101px;
-	background: #FFA6C9;
-	border: 1px solid #FFA6C9;
-	font-size: 55px;
-	font-weight: bold;
-	color: #FFE500;
-	top: 500px;
-	left: 101px;
-	display: inline-flex;
-	align-items: center;
-}
 
-.ticket-buy-button-text1 {
-	bottom: 45px;
-	font-size: 32px;
-	font-weight: bold;
-	color: white;
-	margin-top: 5px;
-}
-
-.ticket-buy-button2 {
-	padding: 40px;
-	width: 288px;
-	height: 101px;
-	background: #D7D7D7;
-	border: 1px solid #BEBEBE;
-	font-size: 55px;
-	font-weight: bold;
-	color: #808080;
-	top: 500px;
-	left: 101px;
-	display: inline-flex;
-	align-items: center;
-}
 
 .ticket-buy-button-text2 {
 	bottom: 45px;
@@ -796,22 +764,6 @@
 	font-size: 14px;
 }
 
-.ticket-next-btn {
-	display: block;
-	width: 555px;
-	padding: 15px;
-	background-color: #FFA6C9;
-	color: white;
-	font-size: 27px;
-	border: none;
-	border-radius: 10px;
-	cursor: pointer;
-	text-align: center;
-	text-decoration: none;
-	font-weight: bold;
-	justify-self: anchor-center;
-	gap: 300px
-}
 
 .ticket-buy-note {
 	width: 843px;
@@ -825,15 +777,6 @@
 	min-height: 269px;
 }
 
-.ticket-buy-middle-box {
-	position: relative;
-	right: -10px;
-}
-
-.ticket-buy-middle-box1 {
-	display: flex;
-	gap: 12px;
-}
 
 .ticket-buy-note-text p {
 	font-size: 14px;
@@ -968,112 +911,7 @@
 	text-align: center;
 }
 
-.ticket-stage-buttons {
-	justify-content: space-between;
-	justify-self: anchor-center;
-	gap: 10px;
-}
 
-.ticket-stage-button2 {
-	display: flex;
-	gap: 20px;
-	padding: 15px;
-	bottom: 50px;
-}
-
-.ticket-stage-back {
-	flex: 1;
-	color: black;
-	background-color: white;
-	border: 1px solid #D7D7D7;
-	padding: 15px;
-	border-radius: 10px;
-	cursor: pointer;
-	font-weight: bold;
-	text-decoration: none;
-	font-size: 23px;
-	text-align: center;
-}
-
-.ticket-stage-next3 {
-	flex: 1;
-	color: white;
-	background-color: #ffa6c9;
-	padding: 15px;
-	border-radius: 10px;
-	cursor: pointer;
-	font-weight: bold;
-	text-decoration: none;
-	font-size: 23px;
-	text-align: center;
-}
-
-.ticket-stage-complete {
-	flex: 1;
-	background-color: white;
-	color: white;
-	border: 1px solid #D7D7D7;
-	padding: 15px;
-	border-radius: 10px;
-	cursor: pointer;
-	font-weight: bold;
-	font-size: 16px;
-}
-
-.ticket-buy-main {
-	position: relative;
-	top: 0;
-	left: 0;
-	width: 100%;
-	max-width: 1450px;
-	padding: 0 0px;
-	box-sizing: border-box;
-	height: 100vh;
-	overflow-y: auto;
-}
-
-.ticket-buy-main * {
-	box-sizing: border-box;
-}
-
-.ticket-buy-page {
-	padding: 0px;
-	background-color: #fff;
-}
-
-.ticket-stage-main {
-	max-width: 1450px;
-	position: relative;
-	top: 0;
-	left: 0;
-	width: 100%;
-	/* 	min-width: 1450px; */
-	padding: 0 0px;
-	box-sizing: border-box;
-	/* 	height: 100vh; */
-	overflow-y: auto;
-}
-
-.ticket-stage-main * {
-	box-sizing: border-box;
-}
-
-.ticket-stage-pink {
-	font-size: 38px;
-	border-bottom: 1px solid white;
-}
-
-.ticket-stage-pink2 {
-	font-size: 18px;
-}
-
-.ticket-stage-grade h4 {
-	text-align: justify;
-}
-
-.ticket-stage-selected h4 {
-	text-align: justify;
-}
 
 map {
 	display: none;
@@ -1188,98 +1026,13 @@ map {
 	gap: 5px;
 }
 
-.ticket-buy3-box {
-	border: 1px solid #D7D7D7;
-	border-radius: 12px;
-	padding: 20px;
-	min-height: 50px;
-	width: 842px;
-	right: 500px;
-	justify-items: anchor-center;
-}
-
-.ticket-buy3-note {
-	width: 842px;
-	right: 400px;
-	display: block;
-	margin-top: 229px;
-	font-size: 18px;
-	border: 1px solid #D7D7D7;
-	border-radius: 10px;
-	padding: 20px;
-	min-height: 246px;
-}
-
-.ticket-buy4-box2 {
-	border: 1px solid #D7D7D7;
-	border-radius: 10px;
-	padding: 20px;
-	min-height: 50px;
-	width: 320px;
-	height: 776px;
-}
-
-.ticket-buy4-box3 {
-	border: 1px solid #D7D7D7;
-	border-radius: 12px;
-	padding: 20px;
-	min-height: 500px;
-	width: 510px;
-	right: 720px;
-	justify-content: center;
-}
-
-.ticket-buy4-input2 {
-	width: 100px;
-	text-align: center;
-}
-
-.ticket-buy4-text1 {
-	color: #808080;
-	font-size: 16px;
-	margin-top: 10px;;
-	line-height: 1.6;
-	align-self: flex-start;
-}
-
-.ticket-buy-table2 {
-	text-align: justify;
-	padding: 1px 1px 1px 10px;
-	line-height: 27px;
-}
-
-.ticket-buy-table2 th {
-	text-align: justify;
-	padding: 1px 1px 1px 10px;
-}
-
-.ticket-buy-total {
-	border-radius: 10px;
-	margin-top: 12px;
-	background: #eee;
-	padding: 10px 10px 10px 20px;
-	display: flex;
-	justify-content: right;
-	align-items: center;
-}
-
 .ticket-price {
+
 	display: flex;
 	align-items: baseline;
 	gap: 5px;
 }
 
-.ticket-buy-total strong {
-	color: #FFE500;
-	font-size: 38px;
-	padding: 0px 0px 0px 106px;
-}
-
-.ticket-buy-total span {
-	padding: 10px 20px 10px 15px;
-	font-size: 26px;
-	font-weight: 600;
-}
 
 .ticket-buy-total p {
 	color: white;
@@ -1296,66 +1049,8 @@ map {
 	justify-content: center;
 }
 
-.custom-radio input {
-	display: none;
-}
 
-.custom-radio span {
-	position: relative;
-	padding-left: 30px;
-	cursor: pointer;
-}
 
-.custom-radio span::before {
-	content: "";
-	position: absolute;
-	left: 0;
-	top: 50%;
-	transform: translateY(-50%);
-	width: 15px;
-	height: 15px;
-	border: 1px solid #D9D9D9;
-	border-radius: 50%;
-	background: white;
-}
-
-.custom-radio input:checked+span::before {
-	background: white;
-	border-color: #FFA6C9;
-}
-
-.custom-radio input:checked+span::after {
-	content: "";
-	position: absolute;
-	left: 8.5px;
-	top: 50%;
-	transform: translate(-50%, -50%);
-	width: 10px;
-	height: 10px;
-	background: #FFA6C9;
-	border-radius: 50%;
-}
-
-.ticket-buy3-box2 {
-	width: 800px;
-	gap: 30px;
-	padding: 10px;
-	background: #D9D9D9;
-	border-radius: 10px;
-	gap: 30px;
-	justify-items: anchor-center;
-}
-
-.ticket-buy3-box th {
-	padding: 10px 30px 10px 0px;
-	text-align: justify;
-	align-items: center;
-}
-
-.ticket-buy3-box td {
-	padding: 10px 100px 10px 0px;
-	align-content: baseline;
-}
 
 .ticket-buy4-box4 strong {
 	color: #808080;
@@ -1410,9 +1105,7 @@ map {
 	font-weight: bold;
 }
 
-.ticket-buy3-note-text p {
-	font-size: 15px;
-}
+
 
 .ticket-buy3-cupPluBtn {
 	padding: 5px 20px 5px 20px;
@@ -1440,9 +1133,13 @@ map {
 	color: #808080;
 }
 
+/* 썸네일 이미지 상세 설정 (이미 있던 코드 유지) */
 .ticket-img {
-	position: relative;
-	display: inline-block;
+	width: 100%;
+	height: 150px;
+	object-fit: cover;
+	border-radius: 8px;
+	margin-bottom: 10px;
 }
 
 .ticket-base-img {
@@ -1450,11 +1147,10 @@ map {
 	left: 90px;
 	height: 650px;
 	width: auto;
-	/* 	display: block; */
+	display: block;
 	position: absolute;
 	align-items: anchor-center;
-	height: 650px;
-	top: -315px;
+	top: -235px;
 }
 
 .ticket-buy6-center1 .cons-img {
@@ -1514,7 +1210,7 @@ map {
 
 .ticket-logow-img {
 	position: absolute;
-	top: -260px;
+	top: -150px;
 	left: 200px;
 	width: 120px;
 	opacity: 0.9;
@@ -1782,7 +1478,6 @@ map {
 .member-Member-box2 {
 	position: inherit;
 	width: 100%;
-
 }
 
 .member-Member-box1 strong {
@@ -1815,7 +1510,6 @@ map {
 	font-size: 12px;
 	font-weight: bold;
 	text-decoration: none;
-
 }
 
 .member-box1-bottom1 th {
@@ -1849,6 +1543,11 @@ map {
 	border: 5px solid #D9D9D9;
 	border-radius: 100%;
 	position: absolute;
+
+	  width: 180px;     /* 필요하면 160~200px 사이에서 조정 */
+ 	 height: 180px;
+	  object-fit: cover;   /* 박스를 꽉 채우면서 중앙 기준으로 잘라줌 */
+ 	 display: block;
 }
 
 .member-Member-prMod {
@@ -1894,6 +1593,7 @@ map {
 .member-Member-dayBox table {
 	text-align: left;
 	line-height: 40px;
+
 }
 
 .member-Member-dayBox span {
@@ -2064,13 +1764,6 @@ map {
 	margin-bottom: 10px;
 }
 
-.admin-botom-picture p {
-	color: #FFA6C9;
-	font-weight: bold;
-	font-size: 30px;
-	display: inline-block;
-	margin-bottom: 10px;
-}
 
 .member-pick-picture {
 	position: relative;
@@ -2134,139 +1827,8 @@ map {
 	display: flex;
 }
 
-.member-Member-remove {
-	display: flow;
-	width: 800px;
-	text-align: center;
-	color: #808080;
-	font-size: 15px;
-}
-
-.member-Member-noticeBox {
-	width: 800px;
-}
-
-.member-Member-noticeBox button {
-	width: 266px;
-	height: 140px;
-	max-width: 266px;
-	font-size: 20px;
-	background-color: white;
-	border: 1px solid #D9D9D9;
-	color: #808080;
-}
-
-.member-noticeBox-top1 {
-	border-radius: 10px 0px 0px 0px;
-}
-
-.member-noticeBox-top3 {
-	border-radius: 0px 10px 0px 0px;
-}
-
-.member-noticeBox-bottom {
-	width: 40px;
-	min-width: 99.75%;
-	max-height: 70px;
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	border-radius: 0px 0px 10px 10px;
-	color: black !important;
-	background: white;
-}
-
-.member-mytick {
-	text-decoration: none;
-	color: #808080;
-}
-
-.member-Member-click {
-	text-decoration: none;
-	color: #FFA6C9;
-	font-weight: bold;
-}
-
-.member-Member {
-	text-decoration: none;
-	color: #808080;
-}
-
-.mytick-main-box {
-	border: 1px solid #D9D9D9;
-	border-radius: 10px;
-	padding: 30px;
-	width: 800px;
-	font-size: 20px;
-}
-
-.member-ticket-plus {
-	border: 1px solid #D9D9D9;
-	border-radius: 50px;
-	text-align: center;
-	padding: 12px 40px 20px 40px;
-	width: auto;
-	place-self: anchor-center;
-}
-
-.member-ticket-plus strong {
-	color: #FFA6C9;
-	font-size: 30px;
-	white-space: nowrap;
-}
 
 
-.member-Member-conBox {
-	border: 3px solid #FFA6C9;
-	border-radius: 20px;
-	white-space: nowrap;
-	height: auto;
-	position: relative;
-	padding: 50px;
-	height: 312px;
-	width: 600px;
-	min-width: 740px;
-	display: flex;
-	align-items: center;
-	text-decoration: none;
-	margin-bottom: 20px;
-}
-
-.member-Member-conBox:nth-child(2) { /* 공부 색상 차이 */
-  border-left-color: #D9D9D9; /* 두 번째 파랑 */
-}
-
-.member-Member-conBox1 {
-	border: 3px solid #FFA6C9;
-	border-radius: 20px;
-	white-space: nowrap;
-	height: auto;
-	position: relative;
-	padding: 50px;
-	height: 312px;
-	width: 600px;
-	min-width: 800px;
-	display: flex;
-	align-items: center;
-	text-decoration: none;
-}
-
-
-
-.member-Member-conBox2 {
-	border: 1px solid #D9D9D9;
-	border-radius: 20px;
-	white-space: nowrap;
-	height: auto;
-	position: relative;
-	padding: 50px;
-	height: 312px;
-	width: 740px;
-	min-width: 740px;
-	display: flex;
-	align-items: center;
-	text-decoration: none;
-}
 
 .tkRead-main-box {
 	top: 20px;
@@ -2280,20 +1842,7 @@ map {
 	margin-bottom: -30px;
 }
 
-.member-Member-conBox span {
-	display: flex;
-	background: #FFA6C9;
-	width: 180px;
-	text-align: center;
-	padding: 10px 10px 10px 10px;
-	border-radius: 10px;
-	color: white;
-	font-weight: bold;
-	position: relative;
-	place-content: center;
-	top: 10px;
-	left: 250px;
-}
+
 
 .cons-list {
 	display: flex;
@@ -2309,7 +1858,23 @@ map {
 	padding: 20px;
 	width: 860px;
 	font-size: 20px;
+	display: flex;
+    flex-direction: column; /* 세로 방향 정렬 */
+    gap: 20px; /* 섹션 간 간격 추가 (선택 사항) */
 }
+/*AdminMember1.jsx*/
+.member-myTk-box2 {
+	border: 1px solid #D9D9D9;
+	border-radius: 10px;
+	padding: 20px;
+	width: 860px;
+	font-size: 20px;
+	display: flex;
+    flex-direction: column; /* 세로 방향 정렬 */
+    gap: 20px;             /* 섹션 간 간격 */
+    align-items: center;   /* 자식 카드들을 가로 기준 가운데 정렬 */
+}
+
 
 .member-tkRead-dayBox table {
 	right: 60px;
@@ -2506,22 +2071,6 @@ map {
 	position: relative;
 }
 
-.member-mycont-Box {
-	border: 1px solid #D9D9D9;
-	border-radius: 20px;
-	white-space: nowrap;
-	height: auto;
-	position: relative;
-	padding: 20px;
-	height: auto;
-	width: 740px;
-	min-width: 740px;
-	display: block;
-	align-items: center;
-	margin-top: 10px;
-	justify-content: center;
-}
-
 .tkRead-sion-img {
 	width: 738px;
 }
@@ -2530,20 +2079,7 @@ map {
 	width: 738px;
 }
 
-.member-myCont-plus {
-	border: 1px solid #D9D9D9;
-	border-radius: 50px;
-	text-align: center;
-	padding: 12px 40px 20px 40px;
-	width: auto;
-	place-self: anchor-center;
-}
 
-.member-myCont-plus strong {
-	color: #FFA6C9;
-	font-size: 30px;
-	white-space: nowrap;
-}
 
 .cont-cont-list {
 	white-space: pre-line;
@@ -2554,44 +2090,6 @@ map {
 	color: #FFA6C9;
 	white-space: pre-line;
 	width: 720px;
-}
-
-.member-myCont-box {
-	width: 900px;
-	padding: 1px;
-	display: flex;
-}
-
-.member-myCont-but1 {
-	text-align: center;
-	place-content: center;
-	width: 399px;
-	height: 200px;
-	max-width: 427.5px;
-	font-size: 30px;
-	background-color: white;
-	border: 1px solid #D9D9D9;
-	color: #808080;
-	border-radius: 10px 0px 0px 10px;
-	font-size: 30px;
-	text-decoration: none;
-	display: block;
-}
-
-.member-myCont-but2 {
-	text-align: center;
-	place-content: center;
-	text-align: center;
-	display: block;
-	width: 399px;
-	height: 200px;
-	max-width: 427.5px;
-	font-size: 30px;
-	background-color: white;
-	border: 1px solid #D9D9D9;
-	color: #808080;
-	border-radius: 0px 10px 10px 0px;
-	text-decoration: none;
 }
 
 .cont-conts-list th {
@@ -2628,6 +2126,7 @@ map {
 	width: 500px;
 	line-height: 10px;
 	border: 1px solid #D9D9D9;
+	margin-bottom: 20px;
 }
 
 .conts-resNum {
@@ -2656,6 +2155,31 @@ map {
 	border: none;
 	border-radius: 10px;
 	white-space: nowrap;
+}
+
+.conts-conts-btn1 {
+	background: #FFA6C9;
+	padding: 20px 85px 20px 85px;
+	color: white;
+	font-size: 20px;
+	font-weight: bold;
+	outline: none;
+	border: none;
+	border-radius: 10px;
+	white-space: nowrap;
+}
+
+.conts-conts-btn2 {
+	background: #FFA6C9;
+	padding: 20px 214px 20px 214px;
+	color: white;
+	font-size: 20px;
+	font-weight: bold;
+	outline: none;
+	border: none;
+	border-radius: 10px;
+	white-space: nowrap;
+	display: block;
 }
 
 .member-seach-box input {
@@ -2784,254 +2308,30 @@ map {
 	position: absolute;
 }
 
-.admin-Member-memImg {
-	width: 100px;
-}
-
-.admin-Member-conBox {
-	border: 3px solid #FFA6C9;
-	border-radius: 20px;
-	white-space: nowrap;
-	height: 180px;
-	position: relative;
-	padding: 20px 50px 20px 50px;
-	width: 800px;
-	min-width: 800px;
-	display: flex;
-	align-items: center;
-	text-decoration: none;
-	margin-bottom: 20px;
-}
-
-.admin-Member-Box1 span {
-	position: relative;
-	top: 0px;
-	left: 520px;
-	color: white;
-	background: #FFA6C9;
-	padding: 4px 30px 4px 30px;
-	border-radius: 5px;
-	font-weight: bold;
-	font-size: 20px;
-}
-
-.admin-Member-Box {
-	position: relative;
-	left: 40px;
-}
-
-.admin-Member-BoxTb {
-	top: 30px;
-	left: 200px;
-	position: absolute;
-}
-
-.admin-Member-BoxTb th {
-	font-size: 20px;
-	color: black;
-}
-
-.admin-Member-BoxTb td {
-	color: black;
-	font-size: 20px;
-}
-
-.admin-Member-Box1 table {
-	text-align: left;
-	line-height: 40px;
-	width: 400px;
-}
-
-table td:first-child { /* 공부 테이블값 고정*/
+/* table td:first-child { 
 	width: 140px;
 	white-space: nowrap;
 	gap: 4px;
+}*/
 
+/* 1:1 문의하기 테이블 기본 레이아웃 */
+.cont-conts-list table {
+  width: 100%;
+  border-collapse: collapse;
 }
 
-.admin-Member-conBoxnoe {
-	border: 1px solid #D9D9D9;
-	border-radius: 20px;
-	white-space: nowrap;
-	height: 180px;
-	position: relative;
-	padding: 20px 50px 20px 50px;
-	width: 800px;
-	min-width: 800px;
-	display: flex;
-	align-items: center;
-	text-decoration: none;
-	margin-bottom: 20px;
+.cont-conts-list th {
+  text-align: left;
+  line-height: 50px;
+  width: 140px;
+  white-space: nowrap;
+  vertical-align: top;
 }
 
-.admin-member-plus {
-	border: 1px solid #D9D9D9;
-	border-radius: 50px;
-	text-align: center;
-	padding: 12px 40px 20px 40px;
-	width: 250px;
-	height: 80px;
-	place-self: anchor-center;
-	top: 20px;
-	left: 400px;
-	position: relative;
+.cont-conts-list td {
+  vertical-align: top;
 }
 
-.admin-member-plus strong {
-	color: #FFA6C9;
-	font-size: 30px;
-}
-
-.admin-Member-box1 {
-	position: relative;
-	left: 280px;
-	padding: 40px;
-	border: 1px solid #D9D9D9;
-	border-radius: 10px;
-	width: 350px;
-	height: 450px;
-	min-width: 350px;
-	background: white;
-	box-sizing: border-box;
-	background: white;
-	min-width: 300px;
-}
-
-.admin-Member-box1 strong {
-	font-size: 25px;
-	color: #FFA6C9;
-}
-
-.admin-Member-box1 span {
-	font-weight: bold;
-}
-
-.admin-Member-box1 table {
-	line-height: 40px;
-}
-
-.admin-Member-box1 td {
-	font-size: 18px;
-	font-weight: regular;
-	color: #808080;
-}
-
-.admin-btn {
-	background: #FFA6C9 !important;
-	color: white !important;
-	padding: 0px 15px 0px 15px;
-	font-size: 14px !important;
-	border-radius: 10px !important;
-	height: 10px !important;
-	text-decoration: none;
-}
-
-.admin-btn2 {
-	background: #FFA6C9 !important;
-	color: white !important;
-	padding: 10px 15px 10px 15px;
-	font-size: 14px !important;
-	border-radius: 10px !important;
-	height: 10px !important;
-	text-decoration: none;
-	border-spacing: 10px;
-}
-
-.admin-botom-picture {
-	position: relative;
-	flex: 1;
-	width: 150px;
-	text-align: center;
-	max-width: 150px;
-}
-
-.admin-levelBox-text {
-	top: -100px;
-	position: relative;
-	left: 200px;
-	bottom: 128px;
-	text-align: left;
-	line-height: 35px;
-}
-
-.admin-levelBox-text strong {
-	font-size: 45px;
-	color: #FFA6C9;
-}
-
-.admin-levelBox-text span, .admin-levelBox-text table {
-	color: #808080;
-}
-
-.admin-admin-pickBox {
-	border: 1px solid #D9D9D9;
-	border-radius: 10px;
-	padding: 50px;
-	height: 280px;
-	width: 800px;
-	gap: 40px;
-	display: flex;
-	align-self: center;
-	justify-content: space-between;
-}
-
-.admin-admin-pickBox span {
-	color: #808080;
-	font-weight: bold;
-	font-size: 20px;
-	display: inline-block;
-	margin-bottom: 10px;
-}
-
-.admin-admin-pickBox p {
-	color: #FFA6C9;
-	font-weight: bold;
-	font-size: 30px;
-	display: inline-block;
-	margin-bottom: 10px;
-}
-
-.admin-botom-img {
-	width: 100px;
-}
-
-.admin-botom-img1 {
-	width: 89px;
-}
-
-.admin-cont-list {
-	padding: 40px;
-	display: grid;
-	position: relative;
-	left: 30px;
-}
-
-.admin-member-memBox {
-	border: 1px solid white;
-	border-radius: 20px;
-	height: 350px;
-	padding: 0px 0px 0px 0px;
-	;
-}
-
-.admin-member-memList {
-	/*	padding: 30px;*/
-	display: grid;
-	position: relative;
-	left: 30px;
-}
-
-.admin-member-memList span {
-	background: white;
-	color: black;
-	font-weight: bold;
-	width: 180px;
-	margin-top: 5px;
-	text-align: center;
-	font-size: 28px;
-	left: 40px;
-	position: relative;
-}
 
 .member-tkRead-my {
 	position: relative;
@@ -3042,50 +2342,6 @@ table td:first-child { /* 공부 테이블값 고정*/
 	border-spacing: 30px 3px;
 }
 
-.admin-member-memBox3 {
-	place-self: anchor-center;
-	border: 1px solid #D9D9D9;
-	border-radius: 20px;
-	white-space: nowrap;
-	height: auto;
-	position: relative;
-	padding: 30px 25px 30px 30px;
-	height: auto;
-	width: 600px;
-	min-width: 600px;
-	display: flex;
-	flex-direction: column;
-	text-align-last: left;
-	margin-top: 10px;
-	text-align: leftl;
-	place-self: anchor-center;
-}
-
-.admin-con-btn {
-	background: #FFA6C9;
-	text-align-last: center;
-	color: white;
-	font-size: 12px;
-	padding: 0px 15px 0px 15px;
-	line-height: 20px;
-	vertical-align: middle;
-	border-radius: 10px;
-}
-
-.admin-con-btn1 {
-	background: #D9D9D9;
-	text-align-last: center;
-	color: white;
-	font-size: 12px;
-	padding: 0px 15px 0px 15px;
-	line-height: 20px;
-	vertical-align: middle;
-	border-radius: 10px;
-}
-
-.admin-member-memBox3 table {
-	border-spacing: 0px 15px;
-}
 
 .member-ticket-plus {
 	border: 1px solid #D9D9D9;
@@ -3102,124 +2358,9 @@ table td:first-child { /* 공부 테이블값 고정*/
 	white-space: nowrap;
 }
 
-.admin-member-memBox4 {
-	border: 1px solid #D9D9D9;
-	border-radius: 20px;
-	padding: 20px 25px;
-	width: 600px;
-	display: flex;
-	flex-direction: column;
-	gap: 15px;
-	place-self: anchor-center;
-	text-decoration: none;
-	color: black;
-	text-align: left;
-}
-
-.admin-member-top {
-	display: flex;
-	align-items: center;
-	gap: 20px;
-}
-
-.admin-Member-heartImg {
-	width: 80px;
-	height: auto;
-}
-
-.admin-Member-purPer {
-	background: #FFA6C9;
-	padding: 0 15px;
-	width: 130px;
-	border-radius: 5px;
-	color: white !important;
-	font-weight: bold;
-	text-align: center;
-	margin-top: 8px;
-	padding: 10px 10px 10px 10px; 
-	border: 0px solid;
-}
-
-.admin-levelBox1-text {
-	line-height: 1.5;
-	top: -10px;
-	left: 30px;
-}
-
-
-.admin-levelBox1-text strong{
-	color: #FFA6C9;
-	font-size: 40px;
-} 
-.admin-levelBox1-text span {
-	font-size: 20px;
-}
-
-.admin-cons-list {
-	width: 100%;
-	border-collapse: collapse;
-}
-
-.admin-cons-list th {
-	color: black;
-	text-align: left;
-	padding-bottom: 3px;
-}
-
-.admin-cons-list td {
-	font-size: 13px;
-
-}
-
-.admin-member-refund {
-	background: #FFA6C9;
-	color: white !important;
-	padding: 0px 20px 0px 30px;
-	font-size: 12px;
-	border-radius: 10px;
-}
-
-.admin-Member-pointBox {
-	border: 1px solid #D9D9D9;
-	border-radius: 10px;
-	padding: 50px;
-	height: auto;
-	width: 600px;
-	place-self: anchor-center;
-}
-
-.admin-Member-pointBox span {
-	color: #808080;
-}
-
-.admin-Member-pointBox Strong {
-	color: #808080;
-}
-
-.admin-member-memBox5 {
-	border: 1px solid #D9D9D9;
-	border-radius: 20px;
-	padding: 20px 25px;
-	width: 600px;
-	display: flex;
-	flex-direction: column;
-	gap: 15px;
-	place-self: anchor-center;
-	text-decoration: none;
-	color: black;
-	text-align: left;
-}
-
-.admin-member-memBox4 table {
-	border-spacing: 0px 15px;
-}
-
-.admin-member-memBox5 table {
-	border-spacing: 0px 15px;
-}
-
 .AdConts-table {
-	gap: 120px;
+	gap: 150px;
+	display: table;
 }
 
 .AdConts-area {
@@ -3237,34 +2378,6 @@ table td:first-child { /* 공부 테이블값 고정*/
 	line-height: 10px;
 	gap: 20px;
 	border: 1px solid #D9D9D9;
-}
-
-.Admin-conts-list {
-	text-align: left;
-}
-
-.admin-cont-phone1 {
-	width: 250px !important;
-	justify-content: center;
-	gap: 30px;
-	text-align: center;
-	padding: 15px;
-	border-radius: 10px;
-	line-height: 10px;
-	border: 1px solid #D9D9D9;
-	
-}
-
-.admin-cont-phone2 {
-	width: 250px !important;
-	justify-content: center;
-	gap: 30px;
-	text-align: center;
-	padding: 15px;
-	border-radius: 10px;
-	line-height: 10px;
-	border: 1px solid #D9D9D9;
-	margin-left: 10px;
 }
 
 .Ad-conts-resNum {
@@ -3305,24 +2418,6 @@ table td:first-child { /* 공부 테이블값 고정*/
 	text-align: center;
 }
 
-.admin-inven-row {
-	margin-bottom: 8px;
-	display: flex;
-	justify-content: space-between;
-	width: 500px;
-}
-
-.admin-inven-3 {
-	color: #FFA6C9;
-	font-weight: bold;
-	font-size: 35px;
-	margin-bottom: 10px;
-	position: relative;
-	left: 200px;
-	width: 300px;
-	text-align: right;
-}
-
 .inven-main-box2 {
 	border: 1px solid #D9D9D9;
 	border-radius: 10px;
@@ -3338,19 +2433,6 @@ table td:first-child { /* 공부 테이블값 고정*/
 	border-spacing: 10px;
 }
 
-.admin-inven-phone1 {
-	width: 99.6px !important;
-	justify-content: center;
-	gap: 30px;
-	text-align: left;
-	padding: 15px;
-	border-radius: 10px;
-	line-height: 10px;
-	border: 1px solid #D9D9D9;
-}
-
-
-
 .logoutBtn {
 	background-color: white;
 	color: #FFA6C9;
@@ -3362,4 +2444,101 @@ table td:first-child { /* 공부 테이블값 고정*/
 	gap: 1500px;
 	padding: 10px;
 	text-decoration: none;
+}
+
+.tkList {
+	background: white;
+	border: 1px solid #D9D9D9;
+	font-size: 25px;
+	font: bold; color : #D9D9D9;
+	padding: 20px 30px 20px 30px;
+	border-radius: 50px;
+	color: #D9D9D9;
+}
+
+.tkList1 {
+	gap: 30px;
+	display: flex;
+	justify-content: center;
+}
+
+.tkLists {
+	background: white;
+	border: 1px solid #D9D9D9;
+	font-size: 20px;
+	font: bold; color : #D9D9D9;
+	padding: 15px 20px 15px 20px;
+	border-radius: 50px;
+	color: #D9D9D9;
+}
+
+.tkList2 {
+	gap: 30px;
+	display: flex;
+	justify-content: center;
+}
+
+.tickets-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr); /* 공부 열 표시 */
+  gap: 20px;
+}
+
+.ticket-card {
+  cursor: pointer;
+  text-align: center;
+  border: 1px solid #ddd;
+  padding: 10px;
+  border-radius: 10px;
+  transition: transform 0.2s;
+}
+
+.ticket-img {
+  width: 100%;
+  height: 150px;
+  object-fit: cover;
+  border-radius: 8px;
+  margin-bottom: 10px;
+}
+
+
+
+/* ===== 1:1 문의하기 테이블 전용 설정(전역 td:first-child 덮어쓰기) ===== */
+.cont-conts-list table td:first-child {
+  width: auto;          /* 140px 강제 폭 제거 */
+  white-space: normal;  /* 줄바꿈 허용 */
+}
+/* ===== 문의 첨부파일 미리보기 ===== */
+.preview-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  max-width: 500px;
+  align-items: flex-start;
+  justify-content: flex-start;
+}
+
+
+.preview-image,
+.reply-image {
+  width: 120px;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  display: block;
+  margin-top : 30px;
+}
+
+/* 문의하기 테이블 셀 정렬 */
+.cont-conts-list td {
+  vertical-align: top;
+}
+
+/* 공용 구분선 */
+.border-line-tool {
+  border: 0;
+  border-top: 1px solid #ddd;
+  margin-top: 30px;
+  margin-bottom: 30px;
 }

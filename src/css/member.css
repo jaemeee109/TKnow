@@ -1,0 +1,320 @@
+/*src/css/member.css*/
+
+/* ======= 티켓 문의 카드와 버튼 ======= */
+.mytick-main-box {
+	border: 1px solid #D9D9D9;
+	border-radius: 10px;
+	padding: 30px;
+	width: 800px;
+	font-size: 20px;
+}
+
+.member-ticket-plus {
+	border: 1px solid #D9D9D9;
+	border-radius: 50px;
+	text-align: center;
+	padding: 12px 40px 20px 40px;
+	width: auto;
+	place-self: anchor-center;
+}
+
+.member-ticket-plus strong {
+	color: #FFA6C9;
+	font-size: 30px;
+	white-space: nowrap;
+}
+
+.member-Member-conBox {
+	border: 3px solid #FFA6C9;
+	border-radius: 20px;
+	white-space: nowrap;
+	height: auto;
+	position: relative;
+	padding: 50px;
+	height: 312px;
+	width: 600px;
+	min-width: 740px;
+	display: flex;
+	align-items: center;
+	text-decoration: none;
+	margin-bottom: 20px;
+}
+
+.member-Member-conBox:nth-child(2) { 
+	border-left-color: #D9D9D9; 
+}
+
+.member-Member-conBox1 {
+	border: 3px solid #FFA6C9;
+	border-radius: 20px;
+	white-space: nowrap;
+	height: auto;
+	position: relative;
+	padding: 50px;
+	height: 312px;
+	width: 600px;
+	min-width: 800px;
+	display: flex;
+	align-items: center;
+	text-decoration: none;
+}
+
+.member-Member-conBox2 {
+	border: 1px solid #D9D9D9;
+	border-radius: 20px;
+	white-space: nowrap;
+	height: auto;
+	position: relative;
+	padding: 50px;
+	height: 312px;
+	width: 740px;
+	min-width: 740px;
+	display: flex;
+	align-items: center;
+	text-decoration: none;
+}
+
+.member-Member-conBox span {
+	display: flex;
+	background: #FFA6C9;
+	width: 180px;
+	text-align: center;
+	padding: 10px 10px 10px 10px;
+	border-radius: 10px;
+	color: white;
+	font-weight: bold;
+	position: relative;
+	place-content: center;
+	top: 10px;
+	left: 250px;
+}
+
+/* =======  문의  ======= */
+.member-mycont-Box-1 {
+	border: 1px solid #D9D9D9;
+	border-radius: 20px;
+	white-space: nowrap;
+	height: auto;
+	position: relative;
+	padding: 20px;
+	height: auto;
+	width: 100%;
+	max-width: 740px;
+	display: block;
+	align-items: center;
+	margin-top: 10px;
+	justify-content: center;
+}
+.member-myCont-plus {
+	border: 1px solid #D9D9D9;
+	border-radius: 50px;
+	text-align: center;
+	padding: 12px 40px 20px 40px;
+	width: auto;
+	place-self: anchor-center;
+}
+
+.member-myCont-plus strong {
+	color: #FFA6C9;
+	font-size: 30px;
+	white-space: nowrap;
+}
+
+.member-myCont-box {
+	width: 100%;
+	padding: 1px;
+	display: flex;
+}
+
+.member-myCont-but1 {
+	text-align: center;
+	place-content: center;
+	width: 399px;
+	height: 200px;
+	max-width: 427.5px;
+	font-size: 30px;
+	background-color: white;
+	border: 1px solid #D9D9D9;
+	color: #808080;
+	border-radius: 10px 0px 0px 10px;
+	font-size: 30px;
+	text-decoration: none;
+	display: block;
+}
+
+.member-myCont-but2 {
+	text-align: center;
+	place-content: center;
+	text-align: center;
+	display: block;
+	width: 399px;
+	height: 200px;
+	max-width: 427.5px;
+	font-size: 30px;
+	background-color: white;
+	border: 1px solid #D9D9D9;
+	color: #808080;
+	border-radius: 0px 10px 10px 0px;
+	text-decoration: none;
+}
+
+.member-Member-page-1{
+	padding: 80px 1px 80px 1px;
+	gap: 0px;
+	display: flex;
+	align-items: flex-start;
+	box-sizing: border-box;
+	min-height: auto;
+	justify-content: flex-start;
+	width: 100%;
+	max-width: 1200px;
+}
+
+/* MyContact 페이지 전용: 사이드바와 본문 배치 정렬 */
+.member-Member-page-1 .member-Member-box1 {
+	left: 0;
+}
+
+.member-Member-page-1 .member-right {
+	margin-left: 40px;
+	width: auto;
+	max-width: 800px;
+}
+
+.member-myTk-box2-1{
+	border: 1px solid #D9D9D9;
+	border-radius: 10px;
+	padding: 20px;
+	width: 100%;
+	font-size: 20px;
+	display: flex;
+	flex-direction: column;
+	gap: 20px;
+	align-items: flex-start;
+}
+
+.member-mycont-Box-1{
+	width: 100%;
+	max-width: 740px;
+}
+
+
+/* 마이페이지 */
+
+.member-Member-noticeBox {
+	width: 800px;
+}
+
+.member-Member-noticeBox button {
+	width: 266px;
+	height: 140px;
+	max-width: 266px;
+	font-size: 20px;
+	background-color: white;
+	border: 1px solid #D9D9D9;
+	color: #808080;
+}
+
+.member-noticeBox-top1 {
+	border-radius: 10px 0px 0px 0px;
+}
+
+.member-noticeBox-top3 {
+	border-radius: 0px 10px 0px 0px;
+}
+
+.member-noticeBox-bottom {
+	width: 40px;
+	min-width: 99.75%;
+	max-height: 70px;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	border-radius: 0px 0px 10px 10px;
+	color: black !important;
+	background: white;
+}
+
+
+.member-Member-remove {
+	display: flow;
+	width: 800px;
+	text-align: center;
+	color: #808080;
+	font-size: 15px;
+}
+
+
+/* 사이드바 */
+
+.member-mytick {
+	text-decoration: none;
+	color: #808080;
+}
+
+.member-Member-click {
+	text-decoration: none;
+	color: #FFA6C9;
+	font-weight: bold;
+}
+
+.member-Member {
+	text-decoration: none;
+	color: #808080;
+}
+
+
+/* ======== 문의 답변 ======== */
+.reply-list {
+  margin-top: 0px;
+  gap: 10px;
+  padding-top: 10px;
+  padding-bottom: 30px;
+}
+
+.reply-item {
+  margin-top: 0px;
+  padding-top: 0px;
+  padding-bottom: 10px;
+}
+
+/* 관리자 표시 영역 */
+.reply-header {
+  margin-bottom: 6px;
+}
+
+.reply-author {
+  font-weight: bold;
+}
+
+/* 핑크 배경 안에 들어가는 답변 내용 */
+.reply-content {
+  background-color: #fff1f6;
+  padding: 12px 14px;
+  border-radius: 8px;
+  line-height: 1.5;
+  white-space: pre-line;
+}
+
+/* 내용 아래, 약간 더 진한 핑크 계열 날짜/시간 */
+.reply-date {
+  margin-top: 6px;
+  font-size: 14px;
+  color: #f09dbd; /* #FFA6C9보다 조금 진한 톤 */
+}
+
+/* 첨부 이미지 미리보기 */
+.reply-images {
+  margin-top: 10px;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.reply-image {
+  max-width: 150px;
+  max-height: 150px;
+  border-radius: 4px;
+  border: 1px solid #ddd;
+  object-fit: cover;
+}

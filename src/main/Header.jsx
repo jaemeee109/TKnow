@@ -1,3 +1,4 @@
+// src/main/Header.jsx
 import React from "react";
 import "../css/style.css";
 import { Link, useNavigate, useParams } from "react-router-dom"; // ✅ navigate 추가
@@ -9,7 +10,7 @@ export default function Header() {
 
   // 로그인 상태 확인: 토큰이 있으면 true
   const isLoggedIn = !!localStorage.getItem("accessToken");
-  
+  const role = localStorage.getItem("role");
 
   // 로그아웃 함수
   const handleLogout = () => {
@@ -18,8 +19,9 @@ export default function Header() {
     localStorage.removeItem("memberId");
     localStorage.removeItem("role");
 
-    alert("로그아웃 되었습니다!");
+    alert("로그아웃 되었습니다");
     navigate("/"); // 메인으로
+   window.location.replace("/");
   };
 
   return (
@@ -39,9 +41,12 @@ export default function Header() {
               LOGOUT
             </Link>
 
-            <Link className="myPage" to={`/member/Member/${localStorage.getItem("memberId")}`}>
-              MY PAGE
-            </Link>
+			<Link 
+			  className="myPage" 
+			  to={role === "ADMIN" ? "/admin/Admin" : `/member/Member/${localStorage.getItem("memberId")}`}
+			>
+			  MY PAGE
+			</Link>
           </>
         ) : (
           // 비로그인 UI

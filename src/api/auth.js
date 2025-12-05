@@ -1,6 +1,7 @@
+//src/api/auth.js
 import axios from "axios";
 
-const BASE_URL = "http://localhost:9090/ticketnow"; // 백엔드 URL
+const BASE_URL = process.env.REACT_APP_API_BASE;
 
 export const login = async (memberId, password) => {
   return axios.post(`${BASE_URL}/auth/login`, {
@@ -16,4 +17,3 @@ export const signup = async (memberId, password, memberName) => {
     memberName
   });
 };
-

@@ -1,169 +1,164 @@
+// src/admin/AdminInven.jsx
 import React, { useState, useEffect } from "react";
+import "../css/admin.css";
 import "../css/style.css";
-import { Link } from "react-router-dom";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import AdminSidebar from "./AdminSidebar"
+import api from "../api";
 
-
-
+const BASE_URL = (api.defaults.baseURL || "").replace(/\/$/, "");
 
 export default function AdminInven() {
 
 	const [tickets, setTickets] = useState([]);
-	const [editingId, setEditingId] = useState(null);
-	const [formData, setFormData] = useState({});
+	const [loading, setLoading] = useState(true);
+	const [error, setError] = useState("");
 	const navigate = useNavigate();
-
 
 	// 서버에서 티켓 목록 불러오기
 	useEffect(() => {
-		fetch("http://localhost:9090/ticketnow/admin/tickets", {
-			headers: {
-				Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-				"Content-Type": "application/json",
-			},
-		})
-			.then((res) => res.json())
-			.then((data) => {
+		const fetchTickets = async () => {
+			try {
+				const token = localStorage.getItem("accessToken");
+
+				// 티켓 정보 불러오기
+				const res = await fetch(`${BASE_URL}/tickets?page=1&size=100`, {
+					headers: {
+						Authorization: `Bearer ${token}`,
+						"Content-Type": "application/json",
+					},
+				});
+
+				if (!res.ok) {
+					throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+				}
+
+				const data = await res.json();
 				console.log("서버 티켓 목록:", data);
-				if (Array.isArray(data)) setTickets(data);
-				else if (Array.isArray(data.data)) setTickets(data.data);
-				else setTickets([]);
-			})
-			.catch((err) => console.error("티켓 불러오기 실패:", err));
+
+
+				// 응답 구조에 맞게 데이터 추출
+				if (Array.isArray(data)) {
+					setTickets(data);
+				} else if (data.data && Array.isArray(data.data)) {
+					setTickets(data.data);
+				} else if (data.list && Array.isArray(data.list)) {
+					setTickets(data.list);
+				} else {
+					setTickets([]);
+				}
+
+				setLoading(false);
+			} catch (err) {
+				console.error("티켓 불러오기 실패:", err);
+				setError(err.message);
+				setLoading(false);
+			}
+		};
+
+		fetchTickets();
 	}, []);
 
-	// 수정 모드 전환
-	const handleEdit = (ticket) => {
-		setEditingId(ticket.id);
-		setFormData({ ...ticket });
-	};
-
-	// 입력 변경 핸들러
-	const handleChange = (e) => {
-		const { name, value } = e.target;
-		setFormData({ ...formData, [name]: value });
-	};
-
-	// 수정 저장
-	const handleSave = (id) => {
-		fetch(`http://localhost:9090/ticketnow/admin/tickets/${id}`, {
-			method: "PUT",
-			headers: {
-				Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-				"Content-Type": "application/json",
-			},
-			body: JSON.stringify(formData),
-		})
-			.then((res) => {
-				if (!res.ok) throw new Error("수정 실패");
-				return res.json();
-			})
-			.then(() => {
-				alert("수정 완료!");
-				setEditingId(null);
-				// 목록 새로고침
-				return fetch("http://localhost:9090/ticketnow/admin/tickets", {
-					headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-				});
-			})
-			.then((res) => res.json())
-			.then((data) => {
-				if (Array.isArray(data)) setTickets(data);
-				else if (Array.isArray(data.data)) setTickets(data.data);
-			})
-			.catch((err) => alert("수정 실패: " + err.message));
-	};
-
 	// 삭제
-	const handleDelete = (id) => {
+	const handleDelete = async (ticketId) => {
 		if (!window.confirm("정말 삭제하시겠습니까?")) return;
-		fetch(`http://localhost:9090/ticketnow/admin/tickets/${id}`, {
-			method: "DELETE",
-			headers: {
-				Authorization: `Bearer ${localStorage.getItem("token")}`,
-			},
-		})
-			.then((res) => {
-				if (!res.ok) throw new Error("삭제 실패");
-				alert("삭제 완료!");
-				setTickets((prev) => prev.filter((t) => t.id !== id));
-			})
-			.catch((err) => alert("삭제 실패: " + err.message));
+
+		try {
+			const token = localStorage.getItem("accessToken");
+			const res = await fetch(`${BASE_URL}/tickets/${ticketId}`, {
+				method: "DELETE",
+				headers: {
+					Authorization: `Bearer ${token}`,
+				},
+			});
+
+
+			if (!res.ok) throw new Error("삭제 실패");
+
+			alert("삭제 완료");
+			setTickets((prev) => prev.filter((t) => t.ticketId !== ticketId));
+		} catch (err) {
+			alert("삭제 실패: " + err.message);
+		}
 	};
 
-	const handleClick = (id) => {
-		navigate(`/admin/AdminInven3/${id}`); // 상세 페이지로 이동
+
+	const handleClick = (ticketId) => {
+		navigate(`/admin/AdminInven3/${ticketId}`);
+	};
+
+	const statusLabel = {
+		ON_SALE: "판매중",
+		SOLD_OUT: "매진",
+		SCHEDULED: "오픈 예정",
+		CLOSED: "판매 종료",
 	};
 
 	return (
 		<div className="member-Member-page">
-			<div className="member-left">
-				<div className="admin-Member-box1">
-					<strong>관리자</strong><span> 님 반갑습니다!</span><br /><br />
-					<table>
-						<tbody>
-							<tr><td><Link to="/admin/AdminMember" className="member-mytick">회원 관리</Link></td></tr>
-							<tr><td>보안 관리</td></tr>
-							<tr><td>공지사항 관리</td><td className="admin-btn">공지 등록</td></tr>
-							<tr><td><Link to="/admin/AdminContact" className="member-mytick">1:1 문의사항 관리</Link></td></tr>
-							<tr><td><Link to="/admin/AdminInven" className="member-Member-click">재고 관리</Link></td>
-								<td><Link to="/admin/AdminInven2" className="admin-btn2">상품 등록</Link></td></tr>
-						</tbody>
-					</table>
-					<hr className="member-box1-bottom" />
-					<br /><br />
-					<span className="member-box1-logout">로그아웃</span>
-				</div>
-			</div>
+			<AdminSidebar />{/* ← 공통 사이드바 호출 */}
 
 			<div className="member-right">
 				<div className="member-myTk-box2">
 					<div className="inven-main-box">
-						<table className="admin-member-text1">
-							<thead>
-								<tr>
-									<th>상품명</th>
-									<th>콘서트명</th>
-									<th>가격(원)</th>
-									<th>잔여석(개)</th>
-									<th>상태</th>
-								</tr>
-							</thead>
+						{error && (
+							<div style={{ color: 'red', padding: '10px', marginBottom: '10px' }}>
+								{error}
+							</div>
+						)}
 
-							<tbody>
-								{tickets.length > 0 ? (
-									tickets.map((t) => (
-										<tr
-											key={t.id}
-											onClick={() => handleClick(t.ticketId)}
-											style={{ cursor: "pointer" }}
-										>
-											<td>{t.ticketId}</td>
-											<td>{t.title}</td>
-											<td>{t.price?.toLocaleString()}</td>
-											<td>{t.remainingSeats}</td>
-											<td className={t.remainingSeats > 0 ? "admin-con-btn" : "admin-con-btn1"}>
-												{t.remainingSeats > 0 ? "판매 중" : "판매 종료"}
-											</td>
+						{loading ? (
+							<p>로딩 중</p>
+						) : (
+							<>
+								<table className="admin-member-text1">
+									<thead>
+										<tr>
+											<th>상품번호</th>
+											<th>콘서트명</th>
+											<th>가격(원)</th>
+											<th>잔여석(개)</th>
+											<th>상태</th>
 										</tr>
-									))
-								) : (
-									<tr><td colSpan="5">불러올 티켓이 없습니다</td></tr>
-								)}
-							</tbody>
+									</thead>
 
-						</table><br /><br />
-						<div className="member-ticket-plus">
-							<strong> + </strong> <span> 티켓 목록 더 보기 </span>
-						</div>
+									<tbody>
+										{tickets.length > 0 ? (
+											tickets.map((t) => (
+												<tr
+													key={t.ticketId}
+													onClick={() => handleClick(t.ticketId)}
+													style={{ cursor: "pointer" }}
+												>
+													<td>{t.ticketId}</td>
+													<td>{t.title}</td>
+													<td>{t.price?.toLocaleString()}</td>
+													<td>{t.remainingSeats || t.totalSeats}</td>
 
+													{/* 상태 표시 부분 */}
+													<td className={
+														t.ticketStatus === "ON_SALE"
+															? "admin-con-btn"
+															: "admin-con-btn1"
+													}>
+														{statusLabel[t.ticketStatus] || "알수없음"}
+													</td>
+												</tr>
+											))
+										) : (
+											<tr><td colSpan="5">불러올 티켓이 없습니다</td></tr>
+										)}
+									</tbody>
+								</table>
+								<br /><br />
+								<div className="member-ticket-plus">
+									<strong> + </strong> <span> 티켓 목록 더 보기 </span>
+								</div>
+							</>
+						)}
 					</div>
-				</div><br />
-
-
-
-
-
+				</div>
+				<br />
 
 				<div className="inven-main-box">
 					<table className="admin-member-text1">
@@ -193,9 +188,7 @@ export default function AdminInven() {
 					</table><br /><br />
 				</div><br />
 
-
 				<div className="inven-main-box2">
-
 					<div className="admin-inven-row">
 						<span>판매 티켓 수량</span>
 						<span className="admin-inven-3">150,000 장</span>
@@ -224,7 +217,6 @@ export default function AdminInven() {
 						<span>당기순이익</span>
 						<span className="admin-inven-3">328,775,000 원</span>
 					</div>
-
 				</div>
 				<br />
 
@@ -270,15 +262,7 @@ export default function AdminInven() {
 						<strong> + </strong> <span> 회원 티켓 목록 더 보기 </span>
 					</div>
 				</div>
-
-
-
-			</div >
-
-
-
-
-
-		</div >
+			</div>
+		</div>
 	);
 }

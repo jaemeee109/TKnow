@@ -1,14 +1,16 @@
+// src/admin/Admin.jsx
 import React, { useState, useEffect } from "react";
+import "../css/admin.css";
 import "../css/style.css";
-import axios from "axios";
 import { Link } from "react-router-dom";
-import Kkw from "../images/kkw.png";
+import Propile from "../images/propile.png";
 import ProMod from "../images/pro_mod.png";
 import User from "../images/user.png";
 import Inventory1 from "../images/inventory1.png";
 import Inventory2 from "../images/inventory2.png";
 import Inventory3 from "../images/inventory3.png";
-
+import api from "../api";
+import AdminSidebar from "./AdminSidebar"
 export default function AdminDashboard() {
   const [adminInfo, setAdminInfo] = useState(null);
   const [error, setError] = useState("");
@@ -22,9 +24,8 @@ export default function AdminDashboard() {
       return;
     }
 
-    // ✅ URL 수정: /admins/ → /members/
-    axios
-      .get(`http://localhost:9090/ticketnow/members/${adminId}`, {
+    api
+      .get(`members/${adminId}`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((res) => {
@@ -48,58 +49,14 @@ export default function AdminDashboard() {
   return (
     <div className="member-Member-page">
       {/* 왼쪽 메뉴 */}
-      <div className="member-left">
-        <div className="admin-Member-box1">
-          <strong>{adminInfo.memberName || "관리자"}</strong>
-          <span> 님 반갑습니다!</span>
-          <br /><br />
-          <table>
-            <tbody>
-              <tr>
-                <td>
-                  <Link to="/admin/AdminMember" className="member-mytick">
-                    회원 관리
-                  </Link>
-                </td>
-              </tr>
-              <tr><td>보안 관리</td></tr>
-              <tr>
-                <td>공지사항 관리</td>
-                <td className="admin-btn">공지 등록</td>
-              </tr>
-              <tr>
-                <td>
-                  <Link to="/admin/AdminContact" className="member-mytick">
-                    1:1 문의사항 관리
-                  </Link>
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <Link to="/admin/AdminInven" className="member-mytick">
-                    재고 관리
-                  </Link>
-                </td>
-                <td>
-                  <Link to="/admin/AdminInven2" className="admin-btn2">
-                    상품 등록
-                  </Link>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-          <hr className="member-box1-bottom" />
-          <br /><br />
-          <span className="member-box1-logout">로그아웃</span>
-        </div>
-      </div>
+     <AdminSidebar />{/* ← 공통 사이드바 호출 */}
 
       {/* 오른쪽 정보 */}
       <div className="member-right">
         <div className="member-Member-box2">
           <div className="member-pro-box">
             <div className="member-Member-propile-imgBox">
-              <img src={Kkw} alt="프로필 사진" className="member-Member-proImg" />
+              <img src={Propile} alt="프로필 사진" className="member-Member-proImg" />
               <img src={ProMod} alt="프로필 편집" className="member-Member-prMod" />
 
               <div className="member-propile-table">

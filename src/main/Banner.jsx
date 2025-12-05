@@ -1,8 +1,8 @@
+// src/main/Banner.jsx
 import React from "react";
 import "../css/style.css"
 import { Link, useParams } from "react-router-dom";
 import bannerImg from "../images/txt_banner.png"; 
-import axios from "axios";
 
 export default function Banner() {
 	

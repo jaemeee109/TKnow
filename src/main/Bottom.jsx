@@ -1,3 +1,4 @@
+// src/main/Bottom.jsx
 import React from "react";
 import "../css/style.css"
 import Bottom1 from "../images/bottom1.png";

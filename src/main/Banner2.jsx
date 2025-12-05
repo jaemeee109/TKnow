@@ -1,3 +1,4 @@
+// src/main/Banner2.jsx
 import React from "react";
 import "../css/style.css"
 import bannerImg1 from "../images/banner1.png"; 

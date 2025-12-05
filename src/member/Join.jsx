@@ -1,4 +1,6 @@
+// src/member/Join.jsx
 import React, { useState } from "react";
+import "../css/member.css";
 import "../css/style.css";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";

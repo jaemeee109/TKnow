@@ -1,8 +1,10 @@
+// src/Ticket/TicketBuy2.jsx
 import React, { useState, useEffect } from "react";
+import "../css/ticket.css";
 import "../css/style.css";
 import { Link, useParams, useLocation, useNavigate } from "react-router-dom";
 import Stage from "../images/stage.png";
-import axios from "axios";
+import api from "../api";
 
 export default function TicketBuy2() {
   const { id } = useParams();
@@ -11,30 +13,51 @@ export default function TicketBuy2() {
   const { selectedDate, selectedSeat } = location.state || {};
   const prevSelectedDate = location.state?.selectedDate;
   const [ticket, setTicket] = useState(null);
+  const [selectedSeats, setSelectedSeats] = useState([]);
 
-    const [selectedSeats, setSelectedSeats] = useState([]);
 
-  const handleClick = (path) => {
-    window.location.href = path;
+  // 1️⃣ F2 이동용 navigate 함수 추가 (기존 handleClick 대신)
+  const handleGoF2 = () => {
+	const handleGoF2 = () => {
+	  navigate(`/Floor/F2/${id}`, { 
+	    state: { selectedSeat, selectedDate, ticket }
+	  });
+	};
+    navigate(`/Floor/F2/${id}`, { // id 포함해서 navigate
+      state: {
+        selectedSeat, // TicketBuy2에서 선택한 좌석
+        selectedDate,
+        ticket,
+      },
+    });
   };
-  
-useEffect(() => {
-    axios.get(`http://localhost:9090/ticketnow/tickets/${id}`)
-      .then(res => setTicket(res.data))
-      .catch(err => console.error(err));
+
+  useEffect(() => {
+    api
+      .get(`/tickets/${id}`)
+      .then((res) => {
+        console.log(res.data);  // <-- 여기서 확인
+        setTicket(res.data);
+      })
+      .catch((err) => console.error(err));
   }, [id]);
 
   const handleSelectSeat = (seat) => {
-    if (!selectedSeats.find(s => s.id === seat.id)) {
+    if (!selectedSeats.find((s) => s.id === seat.id)) {
       setSelectedSeats([...selectedSeats, seat]);
     }
   };
 
   const handleNext = () => {
-    navigate(`/Ticket/Buy3/${id}`, { state: { selectedDate: prevSelectedDate, selectedSeats } });
+    navigate(`/Ticket/Buy3/${id}`, {
+      state: { selectedDate: prevSelectedDate, selectedSeats },
+    });
   };
   
-  
+ 
+  const basePrice = ticket?.price || 0;        // R석
+  const sPrice = ticket ? Math.floor(ticket.price * 0.92) : 0; // s석
+
 
   return (
     <div className="ticket-stage-main">
@@ -62,56 +85,73 @@ useEffect(() => {
           <p className="ticket-stage-box">
             원하시는 영역을 선택해 주세요. 공연장에서 위치를 클릭하거나, 오른쪽의 좌석을 선택해 주세요.
           </p>
-          <br /><br />
+          <br />
+          <br />
 
-          <div className="ticket-stage-map" style={{ position: "relative", display: "inline-block" }}>
+          <div
+            className="ticket-stage-map"
+            style={{ position: "relative", display: "inline-block" }}
+          >
             <img src={Stage} className="ticket-stage-img" alt="좌석 배치도" />
 
-            <div
-              className="zone zone-f1"
-              onClick={() => handleClick("")}
-            ></div>
+            <div className="zone zone-f1" onClick={() => {}}></div>
 
+            {/* 2️⃣ zone-f2 클릭 시 navigate 사용 */}
             <div
               className="zone zone-f2"
-              onClick={() => handleClick(`/Fllor/F2`)}
+              onClick={handleGoF2}
             ></div>
           </div>
 
           <div className="ticket-stage-info">
             <div className="ticket-stage-header">
               <button className="ticket-stage-view">
-                <span className="ticket-stage-pink">좌석도 전체보기</span><br />
-                <span className="ticket-stage-pink2">원하는 좌석 위치를 선택하세요</span><br />
+                <span className="ticket-stage-pink">좌석도 전체보기</span>
+                <br />
+                <span className="ticket-stage-pink2">원하는 좌석 위치를 선택하세요</span>
+                <br />
               </button>
-              <br /><br />
+              <br />
+              <br />
             </div>
 
             <div className="ticket-stage-grade">
-              <h4>좌석 등급 / 잔여석</h4><br />
+              <h4>좌석 등급 / 잔여석</h4>
+              <br />
               <div className="ticket-stage-box2">
                 {ticket?.seats?.map((s, idx) => (
                   <div key={idx}>
-                    <span className={`ticket-stage-color ${s.grade.toLowerCase()}`}></span>
-                    {s.grade}석 ({s.type || "STANDING"}) <strong>{s.price?.toLocaleString() || "0"}원</strong>
+                    <span
+                      className={`ticket-stage-color ${s.grade.toLowerCase()}`}
+                    ></span>
+                    {s.grade}석 ({s.type || "STANDING"}){" "}
+                    <strong>{s.price?.toLocaleString() || "0"}원</strong>
                   </div>
                 )) || (
                   <>
-                    <div><span className="ticket-stage-color r"></span>R석 (STANDING) <strong>143,000원</strong></div>
-                    <div><span className="ticket-stage-color s"></span>S석 (STANDING) <strong>132,000원</strong></div>
+				  <div>
+				  <span className="ticket-stage-color r"></span>
+				         R석 (STANDING) <strong>{basePrice.toLocaleString()}원</strong>
+				       </div>
+				       <div>
+				         <span className="ticket-stage-color s"></span>
+				         S석 (STANDING) <strong>{sPrice.toLocaleString()}원</strong>
+				       </div>
                   </>
                 )}
               </div>
             </div>
-            <br /><br />
+            <br />
+            <br />
 
             <div className="ticket-stage-selected">
-              <h4>선택 좌석 / 예매 정보</h4><br />
-			  {ticket?.seats?.map(seat => (
-			           <button key={seat.id} onClick={() => handleSelectSeat(seat)}>
-			             {seat.grade}석 {seat.number}
-			           </button>
-			         ))}
+              <h4>선택 좌석 / 예매 정보</h4>
+              <br />
+              {ticket?.seats?.map((seat) => (
+                <button key={seat.id} onClick={() => handleSelectSeat(seat)}>
+                  {seat.grade}석 {seat.number}
+                </button>
+              ))}
               <table>
                 <thead>
                   <tr>
@@ -123,7 +163,8 @@ useEffect(() => {
                   <tr>
                     <td>{selectedSeat?.split(" ")[0] || "선택 안됨"}</td>
                     <td>
-                      {selectedSeat || "-"} <br />
+                      {selectedSeat || "-"}
+                      <br />
                       {selectedDate ? selectedDate.toLocaleString("ko-KR") : "-"}
                     </td>
                   </tr>
@@ -133,8 +174,8 @@ useEffect(() => {
             <br />
 
             <div className="ticket-stage-buttons">
-              <Link 
-                to={`/Ticket/Buy3/${id}`} 
+              <Link
+                to={`/Ticket/Buy3/${id}`}
                 state={{ selectedDate, selectedSeat, ticket }}
                 className="ticket-stage-next"
               >
@@ -144,8 +185,8 @@ useEffect(() => {
             <br />
 
             <div className="ticket-stage-button2">
-              <Link 
-                to={`/Ticket/Buy/${id}`} 
+              <Link
+                to={`/Ticket/Buy/${id}`}
                 state={{ selectedDate, selectedSeat, ticket }}
                 className="ticket-stage-back"
               >

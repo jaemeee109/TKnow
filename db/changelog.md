@@ -13,4 +13,11 @@ ALTER TABLE ticket
   ADD COLUMN start_at DATETIME NOT NULL COMMENT '공연 시작일시' AFTER ticket_date,
   ADD COLUMN end_date DATETIME NULL COMMENT '공연 종료일시' AFTER start_at;
   =============================================================
+   
+  [2025.11.18]
+  2025-11-18: ticket 테이블에 공연장 주소 및 공연장 이름 추가
+ALTER TABLE ticket
+  ADD COLUMN venueName VARCHAR(255) NOT NULL COMMENT '공연장 이름' AFTER end_date,
+  ADD COLUMN venueAddress VARCHAR(255) NOT NULL COMMENT '공연장 주소' AFTER venueName;
+  ============================================================= 
   

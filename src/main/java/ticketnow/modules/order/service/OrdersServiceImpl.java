@@ -2,6 +2,8 @@ package ticketnow.modules.order.service;
 
 import lombok.extern.slf4j.Slf4j;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,6 +19,7 @@ import ticketnow.modules.order.dto.OrdersListItemDTO;
 import ticketnow.modules.order.api.error.ResourceNotFoundException;
 import ticketnow.modules.order.dto.OrdersDetailDTO;
 import ticketnow.modules.order.mapper.OrdersMapper;
+import ticketnow.modules.ticket.domain.SeatVO;
 
 import java.time.Duration;
 import java.time.LocalDate;
@@ -24,6 +27,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import ticketnow.modules.member.domain.MemberVO;
+import ticketnow.modules.order.domain.OrderTicketVO;
 import ticketnow.modules.order.domain.OrdersVO;
 import ticketnow.modules.order.dto.OrdersCreateRequestDTO;
 
@@ -40,61 +44,63 @@ public class OrdersServiceImpl implements OrdersService {
 
 
 	// 주문 생성
- 	@Override
-    @Transactional
-    public Long createOrder(String memberId, OrdersCreateRequestDTO req) {
+	// 주문 생성
+	@Override
+	@Transactional
+	public Long createOrder(String memberId, OrdersCreateRequestDTO req) {
 
-        log.debug("[Service] createOrder memberId={} req={}", memberId, req);
+	    log.debug("[Service] createOrder memberId={} req={}", memberId, req);
 
-        // 기본 유효성 검증
-        if (memberId == null || memberId.isBlank()) {
-            throw new IllegalArgumentException("주문 생성에는 회원 ID가 필요합니다.");
-        }
-        if (req == null) {
-            throw new IllegalArgumentException("주문 요청 데이터가 비어 있습니다.");
-        }
-        if (req.getOrdersTicketQuantity() == null || req.getOrdersTicketQuantity() <= 0) {
-            throw new IllegalArgumentException("주문 수량은 1개 이상이어야 합니다.");
-        }
-        if (req.getOrdersTotalAmount() == null || req.getOrdersTotalAmount() < 0) {
-            throw new IllegalArgumentException("주문 총 금액이 올바르지 않습니다.");
-        }
-        if (req.getSeatIdList() == null || req.getSeatIdList().isEmpty()) {
-            throw new IllegalArgumentException("최소 1개 이상의 좌석이 필요합니다.");
-        }
+	    // 기본 유효성 검증
+	    if (memberId == null || memberId.isBlank()) {
+	        throw new IllegalArgumentException("주문 생성에는 회원 ID가 필요합니다.");
+	    }
+	    if (req == null) {
+	        throw new IllegalArgumentException("주문 요청 데이터가 비어 있습니다.");
+	    }
+	    if (req.getOrdersTicketQuantity() == null || req.getOrdersTicketQuantity() <= 0) {
+	        throw new IllegalArgumentException("주문 수량은 1개 이상이어야 합니다.");
+	    }
+	    if (req.getOrdersTotalAmount() == null || req.getOrdersTotalAmount() < 0) {
+	        throw new IllegalArgumentException("주문 총 금액이 올바르지 않습니다.");
+	    }
+	    if (req.getSeatIdList() == null || req.getSeatIdList().isEmpty()) {
+	        throw new IllegalArgumentException("최소 1개 이상의 좌석이 필요합니다.");
+	    }
 
-        //  OrdersVO 생성
-        OrdersVO orders = OrdersVO.builder()
-                .member(MemberVO.builder().memberId(memberId).build())
-                .ordersTotalAmount(req.getOrdersTotalAmount())
-                .ordersTicketQuantity(req.getOrdersTicketQuantity())
-                .build();
+	    //  OrdersVO 생성
+	    OrdersVO orders = OrdersVO.builder()
+	            .member(MemberVO.builder().memberId(memberId).build())
+	            .ordersTotalAmount(req.getOrdersTotalAmount())
+	            .ordersTicketQuantity(req.getOrdersTicketQuantity())
+	            .build();
 
-        //  orders 생성
-        int inserted = ordersMapper.insertOrders(orders);
-        if (inserted <= 0 || orders.getOrdersId() == null) {
-            throw new IllegalStateException("주문 생성에 실패했습니다.");
-        }
+	    //  orders 생성
+	    int inserted = ordersMapper.insertOrders(orders);
+	    if (inserted <= 0 || orders.getOrdersId() == null) {
+	        throw new IllegalStateException("주문 생성에 실패했습니다.");
+	    }
 
-        Long ordersId = orders.getOrdersId();
+	    Long ordersId = orders.getOrdersId();
 
-        //  1장당 가격 계산
-        //    - 현재 스키마/코드 상 별도의 정책 정의가 없어,
-        //      총 금액 / 수량 으로 1장 가격을 계산합니다.
-        //      (수수료를 분리할지 여부 등은 팀에서 합의하면,
-        //       이 부분의 계산식만 조정하면 됩니다.)
-        int quantity = req.getOrdersTicketQuantity();
-        int perPrice = (quantity > 0) ? (req.getOrdersTotalAmount() / quantity) : 0;
+	    //  1장당 가격 계산
+	    //    - 현재 스키마/코드 상 별도의 정책 정의가 없어,
+	    //      총 금액 / 수량 으로 1장 가격을 계산합니다.
+	    //      (수수료를 분리할지 여부 등은 팀에서 합의하면,
+	    //       이 부분의 계산식만 조정하면 됩니다.)
+	    int quantity = req.getOrdersTicketQuantity();
+	    int perPrice = (quantity > 0) ? (req.getOrdersTotalAmount() / quantity) : 0;
 
-        // 선택된 좌석 각각에 대해 order_ticket 생성
-        for (Long seatId : req.getSeatIdList()) {
-            if (seatId == null) continue;
-            ordersMapper.insertOrderTicket(ordersId, seatId, perPrice, 1);
-        }
+	    // 선택된 좌석 각각에 대해 order_ticket 생성
+	    for (Long seatId : req.getSeatIdList()) {
+	        if (seatId == null) continue;
+	        ordersMapper.insertOrderTicket(ordersId, seatId, perPrice, 1);
+	    }
 
-        log.info("[Service] createOrder success ordersId={}", ordersId);
-        return ordersId;
-    }
+	    log.info("[Service] createOrder success ordersId={}", ordersId);
+	    return ordersId;
+	}
+
 	 
 	//  티켓 수령방법 선택 페이지
 	@Override
@@ -206,7 +212,7 @@ public class OrdersServiceImpl implements OrdersService {
 
 		// 화면 표시에 맞게 ImageDTO로 변환
 		ImageDTO imageDTO = ImageDTO.builder()
-				.imageUrl(img.getImageUrl()) // 이미지 URL
+				.imageUrl(img.getImgUrl()) // 이미지 URL
 				.isPrimary(img.getIsPrimary()) // 대표 여부
 				.imageSort(img.getImageSort()) // 정렬 순서
 				.imageType(img.getImageType() != null ? img.getImageType().name() : null)

@@ -43,16 +43,16 @@
 
 
   <!-- 3) 수령방법 선택 페이지: 주문/좌석/공연/회원 요약 -->
-	<select id="selectReceiveOptionPage"
-	        parameterType="long"
-	        resultType="ticketnow.modules.order.dto.receive.ReceiveOptionPageDTO">
+   <select id="selectReceiveOptionPage"
+           parameterType="long"
+           resultType="ticketnow.modules.order.dto.receive.ReceiveOptionPageDTO">
     SELECT
       /* 공연 정보 (표시용) */
       t.ticket_title     AS ticketTitle,
       DATE_FORMAT(t.ticket_date, '%Y-%m-%d') AS ticketDate,
       /* 기간/장소/등급/시작시간/러닝타임은 ticket 모듈 확정 전까지 표시문자열로 처리 */
       NULL               AS ticketPeriod,
-      NULL               AS ticketVenue,
+      t.venueName AS venueName,
       NULL               AS audienceGrade,
       DATE_FORMAT(t.ticket_date, '%H:%i') AS showStartTime,
       NULL               AS runningTime,
@@ -93,15 +93,15 @@
   </select>
 
   <!-- 4) 결제하기 페이지: 수령 이후 결제 직전 화면 요약 -->
-	<select id="selectPayPage"
-	        parameterType="long"
-	        resultType="ticketnow.modules.order.dto.pay.PayPageDTO">
+   <select id="selectPayPage"
+           parameterType="long"
+           resultType="ticketnow.modules.order.dto.pay.PayPageDTO">
     SELECT
       /* 공연 정보 (표시용) */
       t.ticket_title     AS ticketTitle,
       DATE_FORMAT(t.ticket_date, '%Y-%m-%d') AS ticketDate,
       NULL               AS ticketPeriod,
-      NULL               AS ticketVenue,
+      t.venueName AS ticketVenue,
       NULL               AS audienceGrade,
       DATE_FORMAT(t.ticket_date, '%H:%i') AS showStartTime,
       NULL               AS runningTime,
@@ -177,7 +177,7 @@
       t.ticket_title         AS ticketTitle,
       DATE_FORMAT(t.ticket_date, '%Y-%m-%d') AS ticketDate,
       DATE_FORMAT(t.ticket_date, '%H:%i')    AS showStartTime,
-      NULL                   AS ticketVenue,
+     t.venueName AS ticketVenue,
 
       s.seat_class           AS seatClass,
       s.seat_code            AS seatCode,
@@ -210,7 +210,8 @@
       o.updated_at           AS updatedAt,
 
       /* 예매자 표시용 */
-      m.member_name          AS memberName
+      m.member_name          AS memberName,
+      m.member_phone AS memberPhone
 
     FROM orders o
     JOIN order_ticket ot ON ot.orders_id = o.orders_id
@@ -223,16 +224,16 @@
     LIMIT 1
   </select>
   
-	  <!-- 티켓 주문ID -> ticket_id (대표 1건) -->
-	<select id="selectTicketIdByOrdersId" parameterType="long" resultType="long">
-	  SELECT s.ticket_id
-	  FROM orders o
-	  JOIN order_ticket ot ON ot.orders_id = o.orders_id
-	  JOIN seat s          ON s.seat_id    = ot.seat_id
-	  WHERE o.orders_id = #{ordersId}
-	  ORDER BY ot.order_ticket_id ASC
-	  LIMIT 1
-	</select>
+     <!-- 티켓 주문ID -> ticket_id (대표 1건) -->
+   <select id="selectTicketIdByOrdersId" parameterType="long" resultType="long">
+     SELECT s.ticket_id
+     FROM orders o
+     JOIN order_ticket ot ON ot.orders_id = o.orders_id
+     JOIN seat s          ON s.seat_id    = ot.seat_id
+     WHERE o.orders_id = #{ordersId}
+     ORDER BY ot.order_ticket_id ASC
+     LIMIT 1
+   </select>
   
 
 </mapper>

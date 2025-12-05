@@ -30,6 +30,7 @@ public class OrdersDetailDTO {
     private String seatCode;    // 좌석구역
     private String seatNumber;  // 좌석번호(프론트 용)
     private Long seatId;  // 좌석번호 (FK)
+    private String memberPhone;  // 회원 번호
 
  // =================== 수령방법 =================== 
     private String deliveryMethod;    // "현장수령"  or "모바일티켓" ..

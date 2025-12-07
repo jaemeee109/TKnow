@@ -13,7 +13,7 @@
 <p/> - 백엔드 : Database·VO 설계, 공통(Image,Paging), Auth(JWT), Board , Order,Pay 모듈
 <p/> - 프론트엔드 : React
 <p/> <b>전혜진</b>
-<p/> - 프론트엔드 Figma Design  
+<p/> - 웹디자인 Figma
 <p/> <b>박희진</b>
 <p/> - 백엔드 : Member· Ticket 모듈
 <p/> -   GitHub (충돌 병합 및 버전관리)

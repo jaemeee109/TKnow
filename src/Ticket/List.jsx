@@ -59,9 +59,9 @@ export default function List() {
 
   // 프론트에서 카테고리 필터링
   const filteredTickets =
-  category === "ALL"
-    ? tickets
-    : tickets.filter((t) => {
+    category === "ALL"
+      ? tickets
+      : tickets.filter((t) => {
         const value = (t.ticketCategory || "").toUpperCase();
         return value === category;
       });
@@ -69,7 +69,7 @@ export default function List() {
 
   return (
     <div className="toptk">
-      <br/><br/><br/><br/>
+      <br /><br /><br /><br />
 
       <div className="tkList2">
         <Link to="/Ticket/List">
@@ -89,7 +89,7 @@ export default function List() {
         </Link>
       </div>
 
-      <br/><br/>
+      <br /><br />
 
       <div className="TopList">
         <div className="tickets-grid">
@@ -102,12 +102,16 @@ export default function List() {
               <img
                 src={t.mainImageUrl || "/default.jpg"}
                 alt={t.title || "티켓 이미지"}
-                className="ticket-img"
+                className={
+                  "ticket-img" +
+                  (t.ticketStatus === "CLOSED" ? " ticket-img-closed" : "")
+                }
               />
-              <p/>
+              <p />
               <strong>{t.title}</strong>
-              <p/>{t.venueName || "장소 미정"}
-              <p/><span>{formatDate(t.ticketDate)}</span>
+
+              <p />{t.venueName || "장소 미정"}
+              <p /><span>{formatDate(t.ticketDate)}</span>
             </div>
           ))}
         </div>

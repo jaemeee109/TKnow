@@ -64,7 +64,7 @@ export default function Login() {
             if (err.response?.status === 401) {
                 alert("아이디 또는 비밀번호가 올바르지 않습니다.");
             } else if (err.response?.status === 403) {
-                alert("탈퇴한 회원은 로그인할 수 없습니다.");
+                alert("존재하지 않는 계정입니다.");
             } else if (err.response?.status === 500) {
                 alert("서버 오류: 잠시 후 다시 시도해주세요.");
             } else {

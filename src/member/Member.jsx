@@ -5,13 +5,6 @@ import "../css/style.css";
 import { Link, useNavigate } from "react-router-dom";
 import Pro from "../images/propile.png";
 import ProMod from "../images/pro_mod.png";
-import Cons from "../images/cons.png";
-import Heart from "../images/heart.png";
-import IVE from "../images/pick_ive.png";
-import NJS from "../images/pick_newjeans.png";
-import KIKI from "../images/pick_kiki.png";
-import ILLIT from "../images/pick_illit.png";
-import Ht from "../images/ht.png";
 import api from "../api";
 import MemberSidebar from "./MemberSidebar";
 
@@ -166,6 +159,62 @@ export default function Member() {
     input.click();
   };
 
+  // 회원정보(이메일, 휴대전화) 변경
+  const handleUpdateMember = async () => {
+    const token = localStorage.getItem("accessToken");
+
+    if (!token) {
+      alert("로그인이 필요합니다.");
+      navigate("/login");
+      return;
+    }
+
+    if (!memberId) {
+      alert("회원 정보를 불러오지 못했습니다.");
+      return;
+    }
+
+    try {
+      const res = await api.put(
+        `/members/${memberId}`,
+        {
+          memberEmail,
+          memberPhone,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      // 혹시 서버에서 값 정제/변경하는 경우 대비해서 응답 값으로 다시 세팅
+      if (res?.data) {
+        setMemberEmail(res.data.memberEmail || "");
+        setMemberPhone(res.data.memberPhone || "");
+      }
+
+      alert("회원 정보가 수정되었습니다.");
+    } catch (err) {
+      console.error("회원 정보 수정 실패:", err);
+      const msg =
+        err.response?.data?.message || "회원 정보 수정에 실패했습니다.";
+      alert(msg);
+    }
+  };
+
+
+  // 프로필 이미지 기본이미지로 되돌리기 (프론트 기준)
+  const handleResetProfileImage = () => {
+    // profileUrl 을 비워 두면 아래 resolveImageUrl 에서 기본이미지(Pro)를 사용하도록 처리되어 있습니다.
+    setProfileUrl("");
+  };
+
+  // 회원 탈퇴 페이지로 이동
+  const handleGoWithdraw = () => {
+    navigate("/member/Withdraw");
+  };
+
 
 
   return (
@@ -176,7 +225,7 @@ export default function Member() {
           <div className="member-pro-box">
             <div className="member-Member-propile-imgBox">
 
-              <img
+                           <img
                 src={profileUrl ? profileUrl : Pro}
                 alt="프로필_사진"
                 className="member-Member-proImg"
@@ -187,11 +236,18 @@ export default function Member() {
                   e.target.src = Pro;
                 }}
               />
+              {/* 프로필 이미지 변경 / 삭제 버튼 (같은 스타일, 나란히 배치) */}
               <button
                 onClick={handleChangeImage}
                 className="member-propile-change-btn"
               >
                 변경
+              </button>
+              <button
+                onClick={handleResetProfileImage}
+                className="member-propile-change-btn"
+              >
+                삭제
               </button>
               <img
                 src={ProMod}
@@ -199,7 +255,7 @@ export default function Member() {
                 className="member-Member-prMod"
               />
 
-              <div className="member-propile-table">
+                          <div className="member-propile-table">
                 <table>
                   <tbody>
                     <tr>
@@ -208,7 +264,14 @@ export default function Member() {
                     </tr>
                     <tr>
                       <th>이메일</th>
-                      <td>{memberEmail}</td>
+                      <td>
+                        <input
+                          type="email"
+                          className="member-Member-input"
+                          value={memberEmail || ""}
+                          onChange={(e) => setMemberEmail(e.target.value)}
+                        />
+                      </td>
                     </tr>
                     <tr>
                       <th>이름</th>
@@ -216,227 +279,40 @@ export default function Member() {
                     </tr>
                     <tr>
                       <th>휴대 전화 번호</th>
-                      <td>{memberPhone}</td>
-                    </tr>
-                    <tr>
-                      <th>본인인증</th>
                       <td>
-                        <span className="member-member-VerCom">완료</span>
+                        <input
+                          type="text"
+                          className="member-Member-input"
+                          value={memberPhone || ""}
+                          onChange={(e) => setMemberPhone(e.target.value)}
+                        />
                       </td>
                     </tr>
                   </tbody>
                 </table>
               </div>
-            </div>
-          </div>
-          <br />
 
-          {recentOrder ? (
-            <Link to="/member/MyTick" className="member-Member-conBox1">
-              <img
-                src={recentOrder.thumbnail || Cons}
-                alt="콘서트_썸네일"
-                className="member-Member-consImg"
-              />
-              <div className="member-Member-dayBox">
-                <span>{recentOrder.daysAgo} </span>
-                <div className="member-Member-dayBoxTb">
-                  <table>
-                    <tbody>
-                      <tr>
-                        <th>{recentOrder.concertName}</th>
-                      </tr>
-                      <tr>
-                        <th>{recentOrder.venue}</th>
-                      </tr>
-                      <tr>
-                        <td>{recentOrder.date}</td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
+              <div className="member-Member-actions">
+                <button
+                  type="button"
+                  className="member-Member-btn"
+                  onClick={handleUpdateMember}
+                >
+                  회원정보 변경
+                </button>
               </div>
-            </Link>
-          ) : (
-            <Link to="/member/MyTick" className="member-Member-conBox1">
-              <img
-                src={Cons}
-                alt="콘서트_썸네일"
-                className="member-Member-consImg"
-              />
-              <div className="member-Member-dayBox">
-                <span>주문 내역이 없습니다</span>
-                <div className="member-Member-dayBoxTb">
-                  <table>
-                    <tbody>
-                      <tr>
-                        <th>-</th>
-                      </tr>
-                      <tr>
-                        <th>-</th>
-                      </tr>
-                      <tr>
-                        <td>-</td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </Link>
-          )}
-          <br />
 
-          <div className="member-Member-payment">
-            <strong>대표 결제 수단</strong>&nbsp;&nbsp;&nbsp;&nbsp;
-            <span className="member-bank">카카오뱅크</span>
-            <br />
-            <br />
-            <span>3333-1234-56-7890</span>&nbsp;&nbsp;&nbsp;&nbsp;
-            <span>김나우</span>&nbsp;&nbsp;&nbsp;&nbsp;
-            <span>변경</span>
-          </div>
-          <br />
 
-          <div className="member-Member-levelBox">
-            <img src={Heart} alt="등급_사진" className="member-Member-heartImg" />
-
-            <div className="member-levelBox-text">
-              <span>힙합개냥이</span>
-              <span>&nbsp;님의 등급은</span>
-              <strong>GOLD</strong>
-              <span>&nbsp;입니다</span>
-              <table>
-                <tbody>
-                  <tr>
-                    <th>주문 건</th>
-                    <td>｜</td>
-                    <td>100 건</td>
-                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                    <th>주문 금액</th>
-                    <td>｜</td>
-                    <td>425,414,441 원</td>
-                  </tr>
-                </tbody>
-              </table>
-              <p className="member-Member-purPer">구매 실적 보기</p>
             </div>
           </div>
-          <br />
+  
 
-          <div className="member-Member-pointBox">
-            <span>보유 포인트</span>&nbsp;&nbsp;
-            <strong className="member-poins-live">100,392,102 P</strong>
-            <br />
-            <span>소멸 예정 포인트 (30 일 이내)</span>&nbsp;&nbsp;
-            <strong>12</strong>
-            <strong>P</strong>
-            <br />
-            <span>포인트 프로모션 등록&nbsp;&nbsp;&nbsp;&gt;</span>
-          </div>
-          <br />
-
-          <div className="member-Member-conListBox">
-            <table>
-              <tbody>
-                <tr>
-                  <td>2025 투모로우바이투게더 단독 콘서트〈# : 유화〉</td>
-                  <td>2025. 10. 11</td>
-                  <td>
-                    <span className="member-list-none">미작성</span>
-                  </td>
-                </tr>
-                <tr>
-                  <td>2025 엔시티위시 단독 콘서트〈WISH’s〉</td>
-                  <td>2025. 09. 23</td>
-                  <td>
-                    <span className="member-list-none">미작성</span>
-                  </td>
-                </tr>
-                <tr>
-                  <td>2025 아일릿 팬미팅〈글릿즈럽〉</td>
-                  <td>2025. 08. 21</td>
-                  <td>
-                    <span className="member-list-none">미작성</span>
-                  </td>
-                </tr>
-                <tr>
-                  <td>2025 백현 단독 콘서트〈럽백 is 백현〉</td>
-                  <td>2025. 07. 01</td>
-                  <td>
-                    <span>작성 완료</span>
-                  </td>
-                </tr>
-                <tr>
-                  <td>2025 알파드라이브 첫 팬미팅</td>
-                  <td>2025. 06. 03</td>
-                  <td>
-                    <span>작성 완료</span>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-          <br />
-
-          <div className="member-Member-pickBox">
-            <div className="member-pick-picture">
-              <img src={IVE} alt="픽_아이브" className="member-pickBox-img" />
-              <img src={Ht} alt="픽_하트" className="member-pickBox-ht" />
-              <p>IVE</p>
-            </div>
-            <div className="member-pick-picture">
-              <img src={NJS} alt="픽_ 뉴진스" className="member-pickBox-img" />
-              <img src={Ht} alt="픽_하트" className="member-pickBox-ht" />
-              <p>NewJeans</p>
-            </div>
-            <div className="member-pick-picture">
-              <img src={KIKI} alt="픽_키키" className="member-pickBox-img" />
-              <img src={Ht} alt="픽_하트" className="member-pickBox-ht" />
-              <p>KiKi</p>
-            </div>
-            <div className="member-pick-picture">
-              <img src={ILLIT} alt="픽_아일릿" className="member-pickBox-img" />
-              <img src={Ht} alt="픽_하트" className="member-pickBox-ht" />
-              <p>ILLTE</p>
-            </div>
-          </div>
-          <br />
-
-          <div className="member-Member-pwModBox">
-            <strong>비밀번호 찾기</strong>
-            <br />
-            <br />
-            <div className="member-pwModBox-pw">
-              <input type="text" alt="패스워드_변경" />
-              &nbsp;&nbsp;
-              <input type="text" alt="패스워드_변경2" />
-            </div>
-          </div>
-          <br />
-
-          <div className="member-Member-noticeBox">
-            <button alt="1:1문의" className="member-noticeBox-top1">
-              1:1 문의하기
-            </button>
-            <button alt="내 문의 보기" className="member-noticeBox-top2">
-              내 문의 보기
-            </button>
-            <button alt="자주 묻는 질문" className="member-noticeBox-top3">
-              자주 묻는 질문
-            </button>
-            <br />
-            <button alt="고객센터 방문" className="member-noticeBox-bottom">
-              고객센터 방문하기
-            </button>
-          </div>
-          <br />
-          <br />
-
-          <div className="member-Member-remove">
+                    <div className="member-Member-remove">
             <span onClick={handleLogout}>로그아웃</span>
             <span>&nbsp;｜&nbsp;</span>
-            <span>회원탈퇴</span>
+            <span onClick={handleGoWithdraw}>회원탈퇴</span>
           </div>
+
         </div>
       </div>
     </div>

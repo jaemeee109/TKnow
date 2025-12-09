@@ -24,7 +24,43 @@ export default function AdminInven2() {
     minute: "",
   });
   const [venueName, setVenueName] = useState("");
-  const [venueAddress, setVenueAddress] = useState("");
+
+  // === 회차(스케줄) 입력용 상태 ===
+  const [schedules, setSchedules] = useState([
+    { roundNo: 1, year: "", month: "", day: "", hour: "", minute: "" },
+  ]);
+
+  // 회차 한 줄 추가
+  const addScheduleRow = () => {
+    setSchedules((prev) => [
+      ...prev,
+      {
+        roundNo: prev.length + 1,
+        year: "",
+        month: "",
+        day: "",
+        hour: "",
+        minute: "",
+      },
+    ]);
+  };
+
+  // 회차 한 줄 삭제
+  const removeScheduleRow = (index) => {
+    setSchedules((prev) => {
+      const next = prev.filter((_, i) => i !== index);
+      // 삭제 후 회차 번호 다시 1부터 재정렬
+      return next.map((s, idx) => ({ ...s, roundNo: idx + 1 }));
+    });
+  };
+
+  // 개별 회차 값 변경
+  const handleScheduleChange = (index, field, value) => {
+    setSchedules((prev) =>
+      prev.map((s, i) => (i === index ? { ...s, [field]: value } : s))
+    );
+  };
+
   const [totalSeats, setTotalSeats] = useState("");
   const [price, setPrice] = useState("");
   const [ticketCost, setTicketCost] = useState("");
@@ -41,13 +77,13 @@ export default function AdminInven2() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  	  const handleSubmit = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
     setLoading(true);
 
     try {
-      // ===== 1) 필수값 검증 =====
+      // ===== 기본 필수값 검증 =====
       if (!title.trim()) {
         setError("상품명을 입력해주세요.");
         setLoading(false);
@@ -60,42 +96,81 @@ export default function AdminInven2() {
         return;
       }
 
-      // 날짜/시간 필수 입력 체크 (시작일시만 입력)
-      if (
-        !startAt.year ||
-        !startAt.month ||
-        !startAt.day ||
-        !startAt.hour ||
-        !startAt.minute
-      ) {
-        setError("공연 시작 일시를 모두 입력해주세요.");
+      if (!venueName.trim()) {
+        setError("공연장소를 입력해주세요.");
         setLoading(false);
         return;
       }
 
-      // LocalDateTime 으로 변환 가능한 문자열 생성 (yyyy-MM-dd'T'HH:mm:ss)
-      const pad2 = (v) => String(v || "").padStart(2, "0");
+      // ===== 회차(스케줄) 유효성 검사 =====
+      // 하나라도 값이 들어간 줄만 필터링
+      const filledSchedules = schedules.filter(
+        (s) => s.year || s.month || s.day || s.hour || s.minute
+      );
 
-      // 시작일시는 사용자가 입력한 그대로
-      const startDateTime = `${startAt.year}-${pad2(startAt.month)}-${pad2(
-        startAt.day
-      )}T${pad2(startAt.hour)}:${pad2(startAt.minute)}:00`;
+      if (filledSchedules.length === 0) {
+        setError("공연일시는 최소 1회차 이상 입력해야 합니다.");
+        setLoading(false);
+        return;
+      }
 
-      // 종료일시는 "시작일의 23:59:59" 로 자동 설정
-      const endDateTime = `${startAt.year}-${pad2(startAt.month)}-${pad2(
-        startAt.day
+      // 각 줄은 연/월/일/시/분이 모두 채워져 있어야 함
+      for (const s of filledSchedules) {
+        if (!s.year || !s.month || !s.day || !s.hour || !s.minute) {
+          setError("모든 공연 회차의 연/월/일/시/분을 모두 입력해주세요.");
+          setLoading(false);
+          return;
+        }
+      }
+
+      // 날짜 포맷 헬퍼 (YYYY-MM-DDTHH:mm)
+      const buildLocalDateTimeString = (dateObj) => {
+        const pad2 = (v) => String(v).padStart(2, "0");
+        const { year, month, day, hour, minute } = dateObj;
+        return `${year}-${pad2(month)}-${pad2(day)}T${pad2(
+          hour
+        )}:${pad2(minute)}`;
+      };
+
+      // showAt 문자열 생성 + 정렬용 배열
+      const scheduleWithShowAt = filledSchedules.map((s) => {
+        const showAt = buildLocalDateTimeString(s);
+        return { ...s, showAt };
+      });
+
+      // showAt 기준으로 오름차순 정렬 (가장 이른 회차, 가장 늦은 회차 계산용)
+      const sortedSchedules = [...scheduleWithShowAt].sort((a, b) =>
+        a.showAt.localeCompare(b.showAt)
+      );
+
+      const first = sortedSchedules[0];
+      const last = sortedSchedules[sortedSchedules.length - 1];
+
+      // 공연 시작일시는 첫 회차 showAt
+      const startDateTime = first.showAt;
+
+      // 공연 종료일시는 마지막 회차 날짜의 23:59:59
+      const pad2 = (v) => String(v).padStart(2, "0");
+      const endDateTime = `${last.year}-${pad2(last.month)}-${pad2(
+        last.day
       )}T23:59:59`;
 
-      // 숫자 검증
+      if (!startDateTime || !endDateTime) {
+        setError("공연 시작/종료일 계산에 실패했습니다.");
+        setLoading(false);
+        return;
+      }
+
+      // ===== 숫자 필드 유효성 검사 =====
       const totalSeatsVal = parseInt(totalSeats, 10);
-      if (isNaN(totalSeatsVal) || totalSeatsVal < 1) {
-        setError("총 좌석 수는 1 이상이어야 합니다.");
+      if (Number.isNaN(totalSeatsVal) || totalSeatsVal <= 0) {
+        setError("총 좌석 수는 1 이상의 숫자로 입력해주세요.");
         setLoading(false);
         return;
       }
 
       const priceVal = parseFloat(price);
-      if (isNaN(priceVal) || priceVal <= 0) {
+      if (Number.isNaN(priceVal) || priceVal <= 0) {
         setError("기본 가격은 0보다 큰 값이어야 합니다.");
         setLoading(false);
         return;
@@ -107,34 +182,44 @@ export default function AdminInven2() {
         return;
       }
 
-      // 이미지 최소 1장 (DTO @NotEmpty(images)와 맞추기)
+      // 이미지 최소 1장
       if (!mainImage && !detailImage) {
         setError("이미지는 최소 1장 이상 첨부해야 합니다.");
         setLoading(false);
         return;
       }
 
-      // ===== 2) FormData 구성 =====
+      // ===== formData 생성 =====
       const formData = new FormData();
 
       // --- DTO와 매핑되는 필드 ---
       formData.append("title", title);
       formData.append("category", category);
-      formData.append("startAt", startDateTime);   // ★ LocalDateTime 파싱 가능한 문자열
-      formData.append("endAt", endDateTime);       // ★ 시작일 기준 23:59:59 자동 설정
       formData.append("venueName", venueName);
-      if (venueAddress) formData.append("venueAddress", venueAddress);
       formData.append("totalSeats", String(totalSeatsVal));
       formData.append("price", String(priceVal));
       formData.append("ticketDetail", ticketDetail);
 
-      // --- 추가로 쌓아두었던 값들(백엔드 DTO에는 아직 없지만, 보내도 무시됨) ---
+      // startAt / endAt 은 회차 기준으로 계산한 값 사용
+      formData.append("startAt", startDateTime);
+      formData.append("endAt", endDateTime);
+
+      // --- 기존에 보내던 부가 필드들 (있으면 그대로 유지) ---
       if (ageLimit) formData.append("ageLimit", ageLimit);
       if (benefit) formData.append("benefit", benefit);
       if (promotion) formData.append("promotion", promotion);
       if (ticketStatus) formData.append("ticketStatus", ticketStatus);
 
-      // ===== 3) 이미지 파일 (List<MultipartFile> images) =====
+      // ===== 회차 목록(schedules[*]) formData 에 추가 =====
+      sortedSchedules.forEach((s, index) => {
+        const roundNo =
+          s.roundNo && s.roundNo > 0 ? s.roundNo : index + 1;
+
+        formData.append(`schedules[${index}].roundNo`, String(roundNo));
+        formData.append(`schedules[${index}].showAt`, s.showAt);
+      });
+
+      // 대표이미지 + 상품설명이미지
       if (mainImage) {
         formData.append("images", mainImage);
       }
@@ -148,7 +233,6 @@ export default function AdminInven2() {
         startAt: startDateTime,
         endAt: endDateTime,
         venueName,
-        venueAddress,
         totalSeats: totalSeatsVal,
         price: priceVal,
         ticketDetail,
@@ -158,21 +242,18 @@ export default function AdminInven2() {
         detailImage: detailImage && detailImage.name,
       });
 
-      // ===== 4) 서버로 POST 요청 =====
+      // ===== 서버로 POST 요청 (기존과 동일 방식) =====
       const res = await api.post("/tickets", formData, {
         headers: {
-          // axios + FormData 사용 시 Content-Type은 생략해도 되지만,
-          // 명시해도 브라우저가 boundary 포함해서 설정합니다.
           "Content-Type": "multipart/form-data",
         },
       });
 
-      console.log("상품 등록 응답:", res.data);
-      alert("상품 등록 완료");
+      console.log("상품 등록 결과:", res.data);
+      alert("상품 등록이 완료되었습니다.");
       navigate("/admin/AdminInven");
     } catch (err) {
-      console.error("상품 등록 오류:", err);
-      // GlobalExceptionHandler에서 내려주는 message 사용
+      console.error("상품 등록 중 오류:", err);
       const msg =
         err.response?.data?.message ||
         err.response?.data?.error ||
@@ -183,8 +264,6 @@ export default function AdminInven2() {
       setLoading(false);
     }
   };
-
-
 
   return (
     <form className="member-Member-page" onSubmit={handleSubmit}>
@@ -277,71 +356,110 @@ export default function AdminInven2() {
                       </td>
                     </tr>
 
+                    {/* ================== 공연일시(여러 회차) ================== */}
                     <tr>
                       <th>
-                        공연 일시 <span style={{ color: "red" }}>*</span>
+                        공연일시
+                        <span style={{ color: "red" }}>*</span>
                       </th>
                     </tr>
                     <tr>
                       <td>
-                        <input
-                          type="text"
-                          placeholder="YYYY"
-                          className="admin-inven-phone1"
-                          value={startAt.year}
-                          maxLength="4"
-                          onChange={(e) =>
-                            setStartAt({ ...startAt, year: e.target.value })
-                          }
-                          required
-                        />
-                        <input
-                          type="text"
-                          placeholder="MM"
-                          className="admin-inven-phone1"
-                          value={startAt.month}
-                          maxLength="2"
-                          onChange={(e) =>
-                            setStartAt({ ...startAt, month: e.target.value })
-                          }
-                          required
-                        />
-                        <input
-                          type="text"
-                          placeholder="DD"
-                          className="admin-inven-phone1"
-                          value={startAt.day}
-                          maxLength="2"
-                          onChange={(e) =>
-                            setStartAt({ ...startAt, day: e.target.value })
-                          }
-                          required
-                        />
-                        <input
-                          type="text"
-                          placeholder="HH"
-                          className="admin-inven-phone1"
-                          value={startAt.hour || ""}
-                          maxLength="2"
-                          onChange={(e) =>
-                            setStartAt({ ...startAt, hour: e.target.value })
-                          }
-                          required
-                        />
-                        :
-                        <input
-                          type="text"
-                          placeholder="mm"
-                          className="admin-inven-phone1"
-                          value={startAt.minute || ""}
-                          maxLength="2"
-                          onChange={(e) =>
-                            setStartAt({ ...startAt, minute: e.target.value })
-                          }
-                          required
-                        />
+                        {schedules.map((s, index) => (
+                          <div
+                            key={index}
+                            className="Ad-conts-resNum"
+                            style={{ marginBottom: "8px" }}
+                          >
+                            {/* 날짜 */}
+                            <input
+                              type="text"
+                              placeholder="YYYY"
+                              className="admin-inven-phone1"
+                              value={s.year}
+                              maxLength={4}
+                              onChange={(e) =>
+                                handleScheduleChange(index, "year", e.target.value)
+                              }
+                            />
+                            <span>년</span>
+                            <input
+                              type="text"
+                              placeholder="MM"
+                              className="admin-inven-phone1"
+                              value={s.month}
+                              maxLength={2}
+                              onChange={(e) =>
+                                handleScheduleChange(index, "month", e.target.value)
+                              }
+                            />
+                            <span>월</span>
+                            <input
+                              type="text"
+                              placeholder="DD"
+                              className="admin-inven-phone1"
+                              value={s.day}
+                              maxLength={2}
+                              onChange={(e) =>
+                                handleScheduleChange(index, "day", e.target.value)
+                              }
+                            />
+                            <span>일</span>
+
+                            {/* 시간 */}
+                            <input
+                              type="text"
+                              placeholder="HH"
+                              className="admin-inven-phone1"
+                              value={s.hour}
+                              maxLength={2}
+                              onChange={(e) =>
+                                handleScheduleChange(index, "hour", e.target.value)
+                              }
+                            />
+                            <span>시</span>
+                            <input
+                              type="text"
+                              placeholder="mm"
+                              className="admin-inven-phone1"
+                              value={s.minute}
+                              maxLength={2}
+                              onChange={(e) =>
+                                handleScheduleChange(index, "minute", e.target.value)
+                              }
+                            />
+                            <span>분</span>
+
+                            {/* 회차 표시 */}
+                            <span className="reserveAng" style={{ marginLeft: "8px" }}>
+                              {index + 1}회차
+                            </span>
+
+                            {/* 2회차 이상부터 삭제 버튼 노출 */}
+                            {index > 0 && (
+                              <button
+                                type="button"
+                                className="admin-con-btn1"
+                                style={{ marginLeft: "8px" }}
+                                onClick={() => removeScheduleRow(index)}
+                              >
+                                회차 삭제
+                              </button>
+                            )}
+                          </div>
+                        ))}
+
+                        <button
+                          type="button"
+                          className="admin-con-btn1"
+                          style={{ marginTop: "8px" }}
+                          onClick={addScheduleRow}
+                        >
+                          + 회차 추가
+                        </button>
                       </td>
                     </tr>
+
                     <tr>
                       <th>
                         공연 장소 <span style={{ color: "red" }}>*</span>
@@ -358,6 +476,7 @@ export default function AdminInven2() {
                         />
                       </td>
                     </tr>
+
                     <tr>
                       <th>
                         총 좌석 수 <span style={{ color: "red" }}>*</span>
@@ -392,15 +511,14 @@ export default function AdminInven2() {
                             const val = e.target.value;
                             setPrice(val);
                             if (val)
-                              setTicketCost(
-                                (parseFloat(val) * 0.4).toFixed(0)
-                              ); // 40% 자동 계산
+                              setTicketCost((parseFloat(val) * 0.4).toFixed(0));
                             else setTicketCost("");
                           }}
                           required
                         />
                       </td>
                     </tr>
+
                     <tr>
                       <th>상품 상세 설명</th>
                     </tr>

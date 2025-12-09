@@ -18,7 +18,10 @@ import TicketBuy3 from "./Ticket/TicketBuy3";
 import TicketBuy4 from "./Ticket/TicketBuy4";
 import TicketBuy5 from "./Ticket/TicketBuy5";
 import TicketBuy6 from "./Ticket/TicketBuy6";
+import F1 from "./Ticket/FloorF1";
 import F2 from "./Ticket/FloorF2";
+import F3 from "./Ticket/FloorF3";
+import F4 from "./Ticket/FloorF4";
 import Login from "./member/Login";
 import Join from "./member/Join";
 import List from "./Ticket/List";
@@ -38,7 +41,9 @@ import AdminInven from "./admin/AdminInven";
 import AdminInven2 from "./admin/AdminInven2";
 import AdminInven3 from "./admin/AdminInven3";
 import TicketCardPg from "./Ticket/TicketCardPg";
-
+import MemberWithdraw from "./member/MemberWithdraw";
+import AdminOrders from "./admin/AdminOrders";
+import AdminOrdersDetail from "./admin/AdminOrdersDetail";
 
 // accessToken이 없으면 alert을 띄우고 메인으로 강제 이동
 // 비회원이 직링 이용시 마이페이지에 접속 가능한 문제 해결
@@ -318,20 +323,49 @@ function App() {
 						}
 					/>
 
+					<Route path="/member/Withdraw" element={<MemberWithdraw />} />
 
+					{/* 관리자: 주문 목록 */}
+					<Route
+						path="/admin/AdminOrders"
+						element={
+							<>
+								<Header />
+								<AdminOrders />
+								<Footer />
+							</>
+						}
+					/>
 
-		// 티켓 페이지 (헤더랑 푸터 없는 화면)
+					{/* 관리자: 주문 상세 */}
+					<Route
+						path="/admin/AdminOrders/:ordersId"
+						element={
+							<>
+								<Header />
+								<AdminOrdersDetail />
+								<Footer />
+							</>
+						}
+					/>
+
+					          // 티켓 페이지 (헤더랑 푸터 없는 화면)
 					<Route path="/Ticket/Buy/:id" element={<TicketBuy />} />
 					<Route path="/Ticket/Buy2/:id" element={<TicketBuy2 />} />
 					<Route path="/Ticket/Buy3/:id" element={<TicketBuy3 />} />
 					<Route path="/Ticket/Buy4/:id" element={<TicketBuy4 />} />
 					<Route path="/Ticket/Buy5/:id" element={<TicketBuy5 />} />
 					<Route path="/Ticket/Buy6/:id" element={<TicketBuy6 />} />
+
+					{/* 좌석 구역별 페이지 */}
+					<Route path="/Floor/F1/:id" element={<F1 />} />
 					<Route path="/Floor/F2/:id" element={<F2 />} />
+					<Route path="/Floor/F3/:id" element={<F3 />} />
+					<Route path="/Floor/F4/:id" element={<F4 />} />
+
 					{/* 가상 카드 PG 풀스크린 페이지 */}
 					<Route path="/Ticket/CardPG/:id" element={<TicketCardPg />} />
-					<Route path="/Ticket/Buy6/:id" element={<TicketBuy6 />} />
-					<Route path="/Floor/F2/:id" element={<F2 />} />
+
 
 				</Routes>
 			</Router>

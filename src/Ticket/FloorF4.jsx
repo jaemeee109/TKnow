@@ -1,13 +1,13 @@
-// src/Ticket/FloorF2.jsx
+// src/Ticket/FloorF4.jsx
 import React, { useEffect, useState } from "react";
 import "../css/ticket.css";
 import "../css/style.css";
 import { Link, useParams, useNavigate, useLocation } from "react-router-dom";
 import api from "../api";
 
-const SEATS_PER_ROW = 20; // 한 줄에 표시할 좌석 개수
+const SEATS_PER_ROW = 20;
 
-export default function F2Floor() {
+export default function F4Floor() {
   const { id } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
@@ -21,35 +21,32 @@ export default function F2Floor() {
 
   const roundNo = selectedRoundNo || 1;
 
-  // 좌석 / 티켓 정보 로딩
+
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // 티켓 기본 정보 없으면 한번 더 조회
         if (!ticketInfo) {
           const ticketRes = await api.get(`/tickets/${id}`);
           setTicketInfo(ticketRes.data);
         }
 
-        // F2 구역 좌석 조회 (현재는 roundNo=1 고정)
         const seatRes = await api.get(`/tickets/${id}/seats`, {
-          params: { roundNo: roundNo, zone: "F2" }
+          params: { roundNo: roundNo, zone: "F4" }
         });
 
         const list = Array.isArray(seatRes.data) ? seatRes.data : [];
 
-        // 백엔드 SeatDetailDTO -> 프론트 좌석 객체로 변환
         const mapped = list.map((s) => ({
           id: s.seatId,
           dbId: s.seatId,
           seatCode: s.seatCode,
-          grade: s.seatClass,   // S / R
-          status: s.seatStatus, // AVAILABLE / RESERVED / PAID ...
+          grade: s.seatClass,
+          status: s.seatStatus,
         }));
 
         setSeats(mapped);
       } catch (err) {
-        console.error("F2 좌석 정보 로드 실패:", err);
+        console.error("F4 좌석 정보 로드 실패:", err);
         setSeats([]);
       } finally {
         setLoading(false);
@@ -60,7 +57,6 @@ export default function F2Floor() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
-  // 좌석 클릭
   const handleSeatClick = (seat, rowIndex, colIndex) => {
     const isReserved =
       seat.status === "RESERVED" ||
@@ -76,7 +72,7 @@ export default function F2Floor() {
       ...seat,
       row: rowIndex + 1,
       number: colIndex + 1,
-      zone: "F2",
+      zone: "F4",
     });
   };
 
@@ -91,7 +87,6 @@ export default function F2Floor() {
   };
 
 
-  // 1차원 seats 배열을 한 줄당 SEATS_PER_ROW 개씩 끊어서 2차원 배열로 변환
   const seatRows = [];
   for (let i = 0; i < seats.length; i += SEATS_PER_ROW) {
     seatRows.push(seats.slice(i, i + SEATS_PER_ROW));
@@ -128,7 +123,7 @@ export default function F2Floor() {
             <div className="ticket-stage-map seat-grid-wrapper">
               {seatRows.map((rowSeats, rowIndex) => (
                 <div key={rowIndex} className="seat-row">
-                  <span className="seat-row-label">F2구역 입장 번호</span>
+                  <span className="seat-row-label">F4구역 입장 번호</span>
                   <div className="seat-row-seats">
                     {rowSeats.map((seat, colIndex) => {
                       const isReserved =
@@ -139,7 +134,7 @@ export default function F2Floor() {
                         selectedSeat && selectedSeat.dbId === seat.dbId;
 
                       let bgColor =
-                        seat.grade === "S" ? "#ffe0ea" : "#d9d9d9"; // S석은 살짝 핑크
+                        seat.grade === "S" ? "#ffe0ea" : "#d9d9d9";
                       if (isReserved) {
                         bgColor = "#999999";
                       } else if (isSelected) {
@@ -159,7 +154,7 @@ export default function F2Floor() {
                             !isReserved &&
                             handleSeatClick(seat, rowIndex, colIndex)
                           }
-                          title={`${seat.grade}석 F2구역 ${rowIndex + 1
+                          title={`${seat.grade}석 F4구역 ${rowIndex + 1
                             }열 ${colIndex + 1}번 (${seat.seatCode})`}
                         />
                       );
@@ -185,7 +180,7 @@ export default function F2Floor() {
                     <td>{selectedSeat ? selectedSeat.grade : "-"}</td>
                     <td>
                       {selectedSeat
-                        ? `F2 구역 - ${selectedSeat.row}열 - ${selectedSeat.number}번`
+                        ? `F4 구역 - ${selectedSeat.row}열 - ${selectedSeat.number}번`
                         : "-"}
                     </td>
                   </tr>

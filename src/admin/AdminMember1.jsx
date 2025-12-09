@@ -135,6 +135,7 @@ export default function MemberDetail() {
 										<tr><th>이메일</th><td>{member?.memberEmail || "정보 없음"}</td></tr>
 										<tr><th>연락처</th><td>{member?.memberPhone || "정보 없음"}</td></tr>
 										<tr><th>가입일</th><td>{formattedDate}</td></tr>
+										{/** 여기에 멤버권한을 지정할수있는 옵션 칸 생성 */}
 									</tbody>
 								</table>
 							</div>
@@ -160,84 +161,7 @@ export default function MemberDetail() {
 					</div>
 
 
-					<br />
-
-					<div className="admin-member-memBox4">
-						<div className="admin-member-top">
-							<img src={Heart} alt="등급_사진" className="admin-Member-heartImg" />
-
-							<div className="admin-levelBox1-text">
-								<span>{member?.memberName || "회원"}</span><span>&nbsp;님의 등급은</span>
-								<strong>Silver</strong><span>&nbsp;입니다</span>
-
-								<table>
-									<tbody>
-										<tr><th>주문 건</th><td>｜</td><td>100 건</td>
-											<th>주문 금액</th><td>｜</td><td>425,414,441 원</td></tr>
-									</tbody>
-								</table>
-
-								<div style={{ marginTop: "20px" }}>
-									<button onClick={sendCoupon} className="admin-Member-purPer">쿠폰 전송</button>
-								</div>
-							</div>
-						</div>
-
-						<table className="admin-cons-list">
-							<tbody>
-								<tr><th colSpan="9">2025 알디원 첫 콘서트 〈알디원플래닛〉</th> <th>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</th>
-									<th className="admin-member-refund">미환불</th></tr>
-
-								<tr>
-									<td>2025. 10. 15 결제 완료</td><td>｜</td>
-									<td>230,000 원</td><td>｜</td>
-									<td>신용카드</td><td>｜</td>
-									<td>2025. 10. 20 환불</td><td>｜</td>
-									<td>단순변심</td>
-								</tr>
-							</tbody>
-						</table>
-
-						<table className="admin-cons-list">
-							<tbody>
-								<tr><th colSpan="9">2025 알디원 첫 콘서트 〈알디원플래닛〉</th> <th>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</th>
-									<th className="admin-member-refund">미환불</th></tr>
-								<tr>
-									<td>2025. 10. 15 결제 완료</td><td>｜</td>
-									<td>230,000 원</td><td>｜</td>
-									<td>신용카드</td><td>｜</td>
-									<td>2025. 10. 20 환불</td><td>｜</td>
-									<td>단순변심</td>
-								</tr>
-							</tbody>
-						</table>
-
-						<table className="admin-cons-list">
-							<tbody>
-								<tr><th colSpan="9">2025 알디원 첫 콘서트 〈알디원플래닛〉</th> <th>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</th>
-									<th className="admin-member-refund">미환불</th></tr>
-								<tr>
-									<td>2025. 10. 15 결제 완료</td><td>｜</td>
-									<td>230,000 원</td><td>｜</td>
-									<td>신용카드</td><td>｜</td>
-									<td>2025. 10. 20 환불</td><td>｜</td>
-									<td>단순변심</td>
-								</tr>
-							</tbody>
-						</table>
-						<br />
-						<div className="member-ticket-plus">
-							<strong> + </strong> <span> 환불 목록 더 보기 </span>
-						</div>
-					</div>
-					<br />
-
-					<div className="admin-Member-pointBox">
-						<span>보유 포인트</span>&nbsp;&nbsp;<strong className="member-poins-live">100,392,102 P</strong><br />
-						<span>소멸 예정 포인트 (30 일 이내)</span>&nbsp;&nbsp;<strong>12</strong><strong>P</strong><br />
-						<span>포인트 프로모션 등록&nbsp;&nbsp;&nbsp;&gt;</span>
-					</div>
-					<br />
+				
 
 					<Link to="/admin/AdminContact/" className="admin-member-memBox4">
 						<table className="admin-member-text1">
@@ -254,25 +178,7 @@ export default function MemberDetail() {
 							<strong> + </strong> <span> 회원 문의 목록 더 보기 </span>
 						</div>
 					</Link>
-					<br />
-
-					<div className="admin-member-memBox5">
-						<table className="admin-member-text1">
-							<tbody>
-								<tr><th>[위시] 진심 이 콘서트 안 간다? 후회할 것 같습니다 제</th><td className="admin-con-btn1">미답변</td></tr>
-								<tr><th>[라이즈] 제 인생은 이 콘 보기 전과 후로 나뉨 ㅜㅜ</th><td className="admin-con-btn1">미답변</td></tr>
-								<tr><th>[아일릿] 아일릿 나의 사랑 나의 여신 나의 사랑</th><td className="admin-con-btn1">미답변</td></tr>
-								<tr><th>[투어스] 42 멤버십 결제했어요 저는 오늘부터 사이입니다</th><td className="admin-con-btn">답변 완료</td></tr>
-								<tr><th>[기타] 왜 알디원 잘생긴 거 말 안 했음? 인생 손해 봤다</th><td className="admin-con-btn">답변 완료</td></tr>
-							</tbody>
-						</table>
-						<br /><br />
-						<div className="member-ticket-plus">
-							<strong> + </strong> <span> 리뷰 목록 더 보기 </span>
-						</div>
-					</div>
-
-					<br />
+				
 				</div>
 			</div>
 		</div>

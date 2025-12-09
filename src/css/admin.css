@@ -297,6 +297,7 @@
 	border-radius: 10px;
 }
 
+
 .admin-member-memBox3 table {
 	border-spacing: 0px 15px;
 }
@@ -538,5 +539,178 @@
 /*=============== AdminContact2.jsx용 =============== */
 /* 전체 문의 내역 페이지는 세로 1열로 정렬 */
 .admin-contact-main-box {
-  display: block;              /* AdminMember1에서 준 flex 해제 */
+  display: block; 
+            /* AdminMember1에서 준 flex 해제 */
+}
+
+.inven-main-box2{
+	position: relative;
+	left: 0px;
+	width: 860px;
+	margin-top: 30px;
+	padding-right: -30px; 
+	letter-spacing: -1.4px;
+	font-size : 22px;
+}
+.admin-inven-tit{
+	margin-bottom: 30px;
+	font-size: 25px;
+	color: #ee70a2;
+	font-weight: 500;
+}
+
+/* AdminInven3 - 회차별 좌석 현황 테이블 전용 스타일 */
+.admin-seat-stats-box {
+  margin-top: 10px;
+   align-items: center;
+    text-align: center !important;
+
+}
+
+/* 숫자/셀 크기를 조금 키워서 가독성 향상 */
+.admin-seat-stats-table th,
+.admin-seat-stats-table td {
+  padding: 20px 20px;
+  font-size: 20px;
+}
+
+/* 헤더는 약간 굵게 */
+.admin-seat-stats-table th {
+  font-weight: 600;
+}
+.admin-inven3-back-btn {
+  width: 150px;       /* 예: 더 넓게 */
+  height: 50px;
+  font-size: 20px;    /* 글자 조금 키우기 */
+  font-weight: 800;
+  color: rgb(255, 255, 255);
+  background-color: #f7aecb;;
+  border-radius: 8px;
+  border: 1px solid #dbdbdb;
+}
+/* ============================
+   AdminOrders (주문 내역 관리)
+   ============================ */
+
+/* (1) 주문 내역 관리에서는 안쪽 박스 테두리 제거 + 가득 차게 */
+.inven-main-box2.admin-orders-box {
+  border: none;           /* 안쪽 박스 테두리 제거 */
+  box-shadow: none;
+  width: 100%;            /* 바깥 member-myTk-box2 안을 꽉 채우도록 */
+  min-width: 0;
+  padding: 20px 10px 10px 10px;
+}
+
+/* 테이블 기본 레이아웃 */
+.admin-orders-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  font-size: 13px;
+}
+
+.admin-orders-table thead th {
+  padding: 10px 8px;
+  border-bottom: 2px solid #f3c3da;
+  background: #fff7fb;
+  color: #444;
+  font-weight: 600;
+  text-align: center;
+}
+
+/* (2) 컬럼 폭 조정 – 결제상태 / 주문상태 컬럼 간섭 안 나게 여유 확보 */
+.admin-orders-col-date {
+  width: 17%;
+}
+.admin-orders-col-title {
+  width: 32%;
+}
+.admin-orders-col-qty {
+  width: 8%;
+}
+.admin-orders-col-amount {
+  width: 15%;
+}
+.admin-orders-col-pay {
+  width: 10%;     /* 결제상태 */
+}
+.admin-orders-col-status {
+  width: 18%;     /* 주문상태 변경 – 조금 더 넓게 */
+}
+
+.admin-orders-table tbody td {
+  padding: 10px 8px;
+  border-bottom: 1px solid #f3f3f3;
+  color: #555;
+  text-align: center;
+  font-size: 12px;
+}
+
+/* 공연명은 왼쪽 정렬 + 말줄임표 */
+.admin-orders-title-cell {
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* 링크 기본 색상 유지 */
+.admin-orders-link {
+  text-decoration: none;
+  color: inherit;
+}
+
+/* 행 배경 번갈아가며 (가독성) */
+.admin-orders-table tbody tr:nth-child(odd) {
+  background-color: #ffffff;
+}
+
+.admin-orders-table tbody tr:nth-child(even) {
+  background-color: #fffafe;
+}
+
+/* 상태 컬럼: 오른쪽 정렬 느낌 */
+.admin-orders-status-cell {
+  text-align: right;
+}
+
+/* 상태 선택 + 버튼 박스 (가로 정렬, 간격 축소) */
+.admin-orders-status-actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 4px;          /* 셀렉트/버튼 간격 살짝 줄이기 */
+  white-space: nowrap;
+}
+
+/* 상태 셀렉트 박스 – 살짝 작게 */
+.admin-orders-status-select {
+  min-width: 80px;
+  height: 30px;
+  padding: 4px 6px;
+  border-radius: 6px;
+  border: 1px solid #dddddd;
+  font-size: 11px;
+  background-color: #ffffff;
+}
+
+/* (3) 주문상태 변경 버튼 – AdminOrders 에서는 작은 버전으로 */
+.admin-orders-status-actions .admin-inven3-back-btn {
+  width: 70px;          /* 기존 150px → 작게 */
+  height: 30px;         /* 기존 50px → 테이블 높이에 맞게 */
+  font-size: 13px;      /* 글자 크기도 축소 */
+  font-weight: 600;
+  padding: 0;
+}
+
+/* 페이지네이션 */
+.admin-orders-pagination {
+  margin-top: 20px;
+  text-align: center;
+}
+
+.admin-orders-page-info {
+  margin: 0 10px;
+  font-size: 13px;
+  color: #555;
 }

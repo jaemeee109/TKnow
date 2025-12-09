@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import "../css/member.css";
 import "../css/style.css";
-import { Link, useLocation } from "react-router-dom";   // ✅ useLocation 추가
+import { Link, useLocation } from "react-router-dom";   //  useLocation 추가
 import api from "../api";
 
 export default function MemberSidebar() {
@@ -13,7 +13,7 @@ export default function MemberSidebar() {
   const location = useLocation();
   const path = location.pathname || "";
 
-  // ✅ URL 기준으로 자동 선택
+  //  URL 기준으로 자동 선택
   let autoActive = "";
   if (path.startsWith("/member/Member")) {
     autoActive = "member";
@@ -28,7 +28,7 @@ export default function MemberSidebar() {
     autoActive = "myContact";
   }
 
-  // ✅ 이제는 URL 기준만 사용 (active prop 무시)
+  // 이제는 URL 기준만 사용 (active prop 무시)
   const current = autoActive;
 
   useEffect(() => {
@@ -74,12 +74,7 @@ export default function MemberSidebar() {
                 </Link>
               </td>
             </tr>
-            <tr>
-              <td>보안설정</td>
-            </tr>
-            <tr>
-              <td>회원등급</td>
-            </tr>
+        
             <tr>
               <td>
                 <Link
@@ -109,7 +104,14 @@ export default function MemberSidebar() {
               </td>
             </tr>
             <tr>
-              <td>고객센터</td>
+              <td><Link
+                  to="/member/OftenContact"
+                  className={
+                    current === "faq"
+                      ? "member-Member-click"
+                      : "member-Member"
+                  }
+                >고객센터</Link></td>
             </tr>
             <tr>
               <td>공지사항</td>

@@ -55,6 +55,7 @@ export default function Read() {
 		setCurrentMonth(newMonth);
 	};
 
+
 	// 달력 생성
 	const generateCalendar = () => {
 		const year = currentMonth.getFullYear();
@@ -94,57 +95,139 @@ export default function Read() {
 	};
 
 	useEffect(() => {
-		const token = localStorage.getItem("accessToken"); // 로그인 시 저장한 JWT
+		const fetchTicket = async () => {
+			const token = localStorage.getItem("accessToken");
+			const config = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
 
-		const config = token
-			? { headers: { Authorization: `Bearer ${token}` } }
-			: {};
-
-		api
-			.get(`/tickets/${id}`, config)
-			.then((res) => {
+			try {
+				const res = await api.get(`/tickets/${id}`, config);
 				console.log("ticket data:", res.data);
 
-				if (!res.data.schedule || res.data.schedule.length === 0) {
+				// 1) 백엔드 schedule(roundNo, showAt) -> 화면용 구조로 변환
+				const schedulesFromServer = Array.isArray(res.data.schedule)
+					? res.data.schedule
+					: [];
 
-					const [sy, sm, sd, sh, smin] = res.data.startAt;
-					const [ey, em, ed] = res.data.endAt;
+				const convertedFromServer = schedulesFromServer
+					.map((s, index) => {
+						let year, month, day, hour, minute;
 
-					const start = new Date(sy, sm - 1, sd);
-					const end = new Date(ey, em - 1, ed);
+						// (1) showAt 이 [yyyy, MM, dd, HH, mm, ss] 배열인 경우
+						if (Array.isArray(s.showAt) && s.showAt.length >= 5) {
+							[year, month, day, hour, minute] = s.showAt;
+						}
+						// (2) showAt 이 "yyyy-MM-ddTHH:mm:ss" 문자열인 경우
+						else if (typeof s.showAt === "string" && s.showAt.length > 0) {
+							const [datePart, timePart = "00:00"] = s.showAt.split("T");
+							const [y, m, d] = datePart.split("-").map((v) => parseInt(v, 10));
+							const [h = "0", mi = "0"] = timePart.split(":");
 
-					const generatedSchedule = [];
-					const currentDate = new Date(start);
+							year = y;
+							month = m;
+							day = d;
+							hour = parseInt(h, 10);
+							minute = parseInt(mi, 10);
+						} else {
+							// 인식 불가능한 데이터는 스킵
+							return null;
+						}
 
-					while (currentDate <= end) {
-						generatedSchedule.push({
-							date: [
-								currentDate.getFullYear(),
-								currentDate.getMonth() + 1,
-								currentDate.getDate()
-							],
-							weekday: ['일', '월', '화', '수', '목', '금', '토'][currentDate.getDay()],
-							time: `${String(sh).padStart(2, "0")}:${String(smin).padStart(2, "0")}`,
-							round: "1회차"
-						});
-						currentDate.setDate(currentDate.getDate() + 1);
+						if (!year || !month || !day) return null;
+
+						const dateArr = [year, month, day];
+						const dateObj = new Date(year, month - 1, day);
+						const weekdays = ["일", "월", "화", "수", "목", "금", "토"];
+						const weekday = weekdays[dateObj.getDay()];
+
+						const pad2 = (v) => String(v).padStart(2, "0");
+						const time = `${pad2(hour ?? 0)}:${pad2(minute ?? 0)}`;
+
+						return {
+							date: dateArr,                       // [년, 월, 일]
+							weekday,                             // 요일 (일~토)
+							time,                                // "HH:mm"
+							round: `${s.roundNo ?? index + 1}회차`, // "1회차" 형식
+						};
+					})
+					.filter(Boolean);
+
+				let finalSchedule = convertedFromServer;
+
+				// 2) 회차 정보가 전혀 없으면 startAt ~ endAt 기준으로 1일 1회차 생성 (기존 fallback 유지)
+				if (!finalSchedule.length) {
+					const start = res.data.startAt;
+					const end = res.data.endAt;
+
+					if (
+						Array.isArray(start) &&
+						start.length >= 5 &&
+						Array.isArray(end) &&
+						end.length >= 3
+					) {
+						const [startYear, startMonth, startDay, startHour, startMinute] =
+							start;
+						const [endYear, endMonth, endDay] = end;
+
+						const startDateObj = new Date(startYear, startMonth - 1, startDay);
+						const endDateObj = new Date(endYear, endMonth - 1, endDay);
+						const weekdays = ["일", "월", "화", "수", "목", "금", "토"];
+
+						const pad2 = (v) => String(v).padStart(2, "0");
+
+						const generated = [];
+						let roundNo = 1;
+
+						for (
+							let d = new Date(startDateObj);
+							d <= endDateObj;
+							d.setDate(d.getDate() + 1)
+						) {
+							const y = d.getFullYear();
+							const m = d.getMonth() + 1;
+							const day = d.getDate();
+							const weekday = weekdays[d.getDay()];
+
+							const time = `${pad2(startHour || 0)}:${pad2(startMinute || 0)}`;
+
+							generated.push({
+								date: [y, m, day],
+								weekday,
+								time,
+								round: `${roundNo}회차`,
+							});
+
+							roundNo++;
+						}
+
+						finalSchedule = generated;
 					}
-
-					res.data.schedule = generatedSchedule;
 				}
 
+				const nextTicket = {
+					...res.data,
+					schedule: finalSchedule,
+				};
 
-				setTicket(res.data);
+				setTicket(nextTicket);
 
-				if (res.data.schedule && res.data.schedule.length > 0) {
-					const firstDate = formatDate(res.data.schedule[0].date);
-					setSelectedDate(firstDate);
-					const [year, month] = res.data.schedule[0].date;
+				// 3) 기본 선택 날짜/달력 설정
+				if (finalSchedule.length > 0) {
+					const firstDateArr = finalSchedule[0].date;
+					const firstDateStr = formatDate(firstDateArr);
+
+					setSelectedDate(firstDateStr);
+
+					const [year, month] = firstDateArr;
 					setCurrentMonth(new Date(year, month - 1, 1));
 				}
-			})
-			.catch((err) => console.error(err));
+			} catch (err) {
+				console.error(err);
+			}
+		};
+
+		fetchTicket();
 	}, [id]);
+
 
 	if (!ticket) return <div>로딩 중...</div>;
 
@@ -168,8 +251,14 @@ export default function Read() {
 									<img
 										src={resolveImageUrl(ticket.mainImageUrl) || Boy}
 										alt={ticket.title}
+										className={
+											ticket.ticketStatus === "CLOSED"
+												? "ticket-img-closed"
+												: undefined
+										}
 									/>
 								</div>
+
 
 								<div className="read-table">
 									<table>
@@ -215,49 +304,48 @@ export default function Read() {
 								</div>
 							</div>
 							<div className="concert-particular">
-								<br/>
+								<br />
 								<strong className="concert-particular-1">공연 시간 정보</strong>
 								{hasSchedule ? (
-									ticket.schedule
-										.filter((item) => formatDate(item.date) === selectedDate)
-										.map((item, idx) => (
-											<p key={idx}>
-												{formatDate(item.date)} ({item.weekday}) {item.time}
-											</p>
-										))
+									ticket.schedule.map((item, idx) => (
+										<p key={idx}>
+											{item.round} : {formatDate(item.date)} ({item.weekday}) {item.time}
+										</p>
+									))
 								) : (
 									<p>공연 일정 정보가 없습니다.</p>
 								)}
 
+
 								<br />
 								<strong className="concert-particular-1">공연 상세</strong>
-<br />
+								<br />
 
-{/* 상품 설명 이미지 + 상세 설명 */}
-<div className="concert-detail-box">
-  <div className="concert-detail-img-box">
-    <img
-      src={resolveImageUrl(ticket.detailImageUrl) || Boy}
-      alt="공연 상세 이미지"
-      className="concert-detail-img"
-    />
-  </div>
-  <br/>
-  <p className="concert-detail-text">
-    {ticket.ticketDetail || "상품 상세 설명이 준비 중입니다."}
-  </p>
-  <br/>
-</div>
+								{/* 상품 설명 이미지 + 상세 설명 */}
+								<div className="concert-detail-box">
+									<div className="concert-detail-img-box">
+										<img
+											src={resolveImageUrl(ticket.detailImageUrl) || Boy}
+											alt="공연 상세 이미지"
+											className="concert-detail-img"
+										/>
+									</div>
+									<br />
+									<p className="concert-detail-text">
+										{ticket.ticketDetail || "상품 상세 설명이 준비 중입니다."}
+									</p>
+									<br />
+								</div>
 
 
-							<strong className="concert-particular-1">예매자 통계</strong>
-							<br />
-							<div className="sex-ratio">
-								<p className="ratio-text1">{ticket.femaleRatio || "55"} %</p>
-								<img src={ticket.Girl || Girl} alt="여성_썸네일" />
-								<p className="ratio-text2">{ticket.maleRatio || "45"} %</p>
-								<img src={ticket.Boy || Boy} alt="남성_썸네일" />
-							</div>
+								<strong className="concert-particular-1">예매자 통계</strong>
+								<br />
+								<div className="sex-ratio">
+									<p className="ratio-text1">{ticket.femaleRatio || "55"} %</p>
+									<img src={ticket.Girl || Girl} alt="여성_썸네일" />
+									<p className="ratio-text2">{ticket.maleRatio || "45"} %</p>
+									<img src={ticket.Boy || Boy} alt="남성_썸네일" />
+								</div>
 							</div>
 						</section>
 					</div>
@@ -301,12 +389,18 @@ export default function Read() {
 															className={`calendar-day ${dayInfo.isSelected ? 'selected' : ''}`}
 															style={{
 																opacity: dayInfo.isCurrentMonth ? 1 : 0.3,
-																background: dayInfo.hasSchedule ? (dayInfo.isSelected ? undefined : '#fff') : '#fff',
-																cursor: dayInfo.hasSchedule ? 'pointer' : 'not-allowed'
+																background: dayInfo.hasSchedule
+																	? (dayInfo.isSelected ? undefined : '#fff')
+																	: '#fff',
+																// 공연 있는 날짜만 손가락 커서, 없는 날짜는 기본 화살표
+																cursor: dayInfo.hasSchedule ? 'pointer' : 'default',
+																// 공연 없는 날짜는 숫자를 더 연한 회색으로 표시
+																color: dayInfo.hasSchedule ? '#000000ff' : '#cecbcbff'
 															}}
 														>
 															{dayInfo.day}
 														</button>
+
 													))}
 												</React.Fragment>
 											))}
@@ -343,9 +437,9 @@ export default function Read() {
 									if (!selectedDate) return;
 									const ticketId = ticket.ticketId; // ticket 객체에서 가져오기
 									window.open(
-										`/Ticket/Buy/${ticketId}`,
-										"TicketBuy",
-										"width=1450,height=1024,scrollbars=yes"
+										`/Ticket/Buy/${ticket.ticketId}`,
+										"_blank",
+										"width=1080,height=800,noopener,noreferrer"
 									);
 								}}
 							>

@@ -1,6 +1,18 @@
 /*src/css/member.css*/
 
 /* ======= 티켓 문의 카드와 버튼 ======= */
+
+.member-propile-change-btn{
+	position: relative;
+	top: -10px;
+	left: 140px;
+	margin-right: 5px;
+	padding: 2px 2px 2px 2px;
+	border-radius: 5px;
+	background: #FFFFFF;
+	border: 1px solid #bdbdbd;
+	color :#585757;
+}
 .mytick-main-box {
 	border: 1px solid #D9D9D9;
 	border-radius: 10px;
@@ -202,8 +214,18 @@
 /* 마이페이지 */
 
 .member-Member-noticeBox {
-	width: 800px;
+	width: 720px;     
+	margin: 0 auto;
+	margin-top: 10px;
+	padding: 20px 25px;
+	border-radius: 20px;
+	border: 1px solid #e5e5e5;
+	background-color: #fff;
+	box-sizing: border-box;
+	
 }
+
+
 
 .member-Member-noticeBox button {
 	width: 266px;
@@ -214,6 +236,8 @@
 	border: 1px solid #D9D9D9;
 	color: #808080;
 }
+
+
 
 .member-noticeBox-top1 {
 	border-radius: 10px 0px 0px 0px;
@@ -242,6 +266,10 @@
 	text-align: center;
 	color: #808080;
 	font-size: 15px;
+	margin-top: 30px;
+}
+.member-Member-remove span {
+	cursor: default;  /* 텍스트 I커서 대신 기본 화살표 유지 */
 }
 
 
@@ -317,4 +345,106 @@
   border-radius: 4px;
   border: 1px solid #ddd;
   object-fit: cover;
+}
+/* 회원 정보 테이블 폰트 정리 */
+.member-propile-table table {
+	width: 100%;
+	border-collapse: collapse;
+}
+
+.member-propile-table table th {
+	width: 140px;
+	text-align: left;
+	font-size: 15px;
+	color: #555;
+	padding: 6px 0;
+}
+
+.member-propile-table table td {
+	font-size: 15px;
+	color: #333;
+	padding: 6px 0;
+}
+
+/* 이메일 / 휴대전화 input 스타일 */
+.member-Member-input {
+	width: 200px;
+	padding: 6px 10px;
+	border: 1px solid #ddd;
+	border-radius: 4px;
+	font-size: 14px;
+	box-sizing: border-box;
+}
+
+/* 카드 하단 버튼 영역 (가운데 정렬) */
+.member-Member-actions {
+	margin-top: 18px;
+	display: flex;
+	justify-content: center;
+	gap: 12px;
+
+}
+
+
+.member-Member-btn {
+	min-width: 140px;
+	padding: 8px 18px;
+	margin-top: 20px;
+	border-radius: 20px;
+	border: none;
+	background-color: #fca5c6;
+	color: #fff;
+	font-size: 14px;
+	cursor: pointer;
+	transition: background-color 0.15s ease, color 0.15s ease, opacity 0.15s ease;
+}
+
+.member-Member-btn-outline {
+	background-color: #fff;
+	color: #ff6fa5;
+	border: 1px solid #ff6fa5;
+}
+
+.member-Member-btn:hover {
+	opacity: 0.9;
+}
+
+.member-Member-btn-outline:hover {
+	background-color: #ff6fa5;
+	color: #fff;
+}
+/* 회원 탈퇴 안내 박스 */
+.member-withdraw-box {
+	margin-top: 20px;
+	padding: 20px 24px;
+	border-radius: 16px;
+	border: 1px solid #f0f0f0;
+	background-color: #fff;
+	box-sizing: border-box;
+}
+
+.member-withdraw-text {
+	font-size: 14px;
+	color: #555;
+	line-height: 1.6;
+	margin-bottom: 8px;
+}
+
+.member-withdraw-agree {
+	display: flex;
+	align-items: center;
+	margin-top: 14px;
+	font-size: 14px;
+	color: #333;
+}
+
+.member-withdraw-agree input {
+	margin-right: 8px;
+}
+
+.member-withdraw-actions {
+	margin-top: 20px;
+	display: flex;
+	justify-content: center;
+	gap: 12px;
 }

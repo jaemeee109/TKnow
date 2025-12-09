@@ -2,302 +2,278 @@
 import React, { useState, useEffect } from "react";
 import "../css/admin.css";
 import "../css/style.css";
-import { data, Link, useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import api from "../api";
-import AdminSidebar from "./AdminSidebar"
+import AdminSidebar from "./AdminSidebar";
+
+const BASE_URL = (api.defaults.baseURL || "").replace(/\/$/, "");
+
+const statusLabel = {
+  ON_SALE: "판매중",
+  SOLD_OUT: "매진",
+  SCHEDULED: "오픈 예정",
+  CLOSED: "판매 종료",
+};
+
+// LocalDateTime 이 배열([yyyy,MM,dd,HH,mm,ss])로 오는 것을 문자열로 변환
+const formatDateTimeArray = (arr) => {
+  if (!Array.isArray(arr) || arr.length < 3) return "";
+  const [year, month, day, hour = 0, minute = 0] = arr;
+  const mm = String(month).padStart(2, "0");
+  const dd = String(day).padStart(2, "0");
+  const hh = String(hour).padStart(2, "0");
+  const mi = String(minute).padStart(2, "0");
+  return `${year}-${mm}-${dd} ${hh}:${mi}`;
+};
+
+// TicketBuy3 과 동일한 규칙으로 S/R/평균 가격 계산
+const calcPriceInfo = (basePrice) => {
+  if (basePrice === null || basePrice === undefined) {
+    return { sPrice: 0, rPrice: 0, avgPrice: 0 };
+  }
+  const sPrice = Number(basePrice);
+  if (Number.isNaN(sPrice)) {
+    return { sPrice: 0, rPrice: 0, avgPrice: 0 };
+  }
+  const rPrice = Math.floor(sPrice * 0.9);
+  const avgPrice = Math.round((sPrice + rPrice) / 2);
+  return { sPrice, rPrice, avgPrice };
+};
+
 export default function AdminInven3() {
-	const navigate = useNavigate();
-	const { ticketId } = useParams();
+  const navigate = useNavigate();
+  const { ticketId } = useParams();
 
-	const [title, setTitle] = useState("");
-	const [startAt, setStartAt] = useState({ year: "", month: "", day: "", hour: "", minute: "" });
-	const [endAt, setEndAt] = useState({ year: "", month: "", day: "", hour: "", minute: "" });
-	const [venueName, setVenueName] = useState("");
-	const [venueAddress, setVenueAddress] = useState("");
-	const [totalSeats, setTotalSeats] = useState("");
-	const [price, setPrice] = useState("");
-	const [ticketCost, setTicketCost] = useState("");
-	const [ticketPrice, setTicketPrice] = useState("");
-	const [ticketStock, setTicketStock] = useState("");
-	const [ticketDetail, setTicketDetail] = useState("");
-	const [ageLimit, setAgeLimit] = useState("");
-	const [benefit, setBenefit] = useState("");
-	const [promotion, setPromotion] = useState("");
-	const [category, setCategory] = useState("");
-	const [ticketStatus, setTicketStatus] = useState("");
+  const [ticket, setTicket] = useState(null);
+  const [seatStats, setSeatStats] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-	const [loading, setLoading] = useState(true);
-	const [error, setError] = useState("");
+  // 티켓 기본 정보 + 회차별 좌석 통계 불러오기
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        const token = localStorage.getItem("accessToken");
+        const headers = token ? { Authorization: `Bearer ${token}` } : {};
 
-	// 페이지 로드 시 기존 티켓 정보 불러오기
-	useEffect(() => {
-		const fetchTicketData = async () => {
-			try {
-				const token = localStorage.getItem("accessToken");
-				const res = await api.get(`/tickets/${ticketId}`, {
-					headers: { Authorization: `Bearer ${token}` }
-				});
+        const [ticketRes, seatRes] = await Promise.all([
+          api.get(`/tickets/${ticketId}`, { headers }),
+          api.get(`/tickets/${ticketId}/seats/stats`, { headers }),
+        ]);
 
-				const data = res.data;
-				console.log("불러온 티켓 정보:", data);
+        setTicket(ticketRes.data);
+        setSeatStats(Array.isArray(seatRes.data) ? seatRes.data : []);
+        setError("");
+      } catch (err) {
+        console.error("재고 조회 데이터 불러오기 실패:", err);
+        setError(err.response?.data?.message || err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-				// 받아온 데이터로 폼 필드 채우기
-				setTitle(data.title || "");
-				setCategory(data.category || "CONCERT");
-				setVenueName(data.venueName || "");
-				setVenueAddress(data.venueAddress || "");
-				setTotalSeats(data.totalSeats || "");
-				setPrice(data.price || "");
-				setTicketCost(data.ticketCost || "");
-				setTicketPrice(data.ticketPrice || "");
-				setTicketStock(data.remainingSeats || data.totalSeats || "");
-				setTicketDetail(data.detail || "");
-				setAgeLimit(data.ageLimit || "");
-				setBenefit(data.benefit || "");
-				setPromotion(data.promotion || "");
-				setPromotion(data.ticketStatus || "");
+    fetchData();
+  }, [ticketId]);
 
-				// 날짜 파싱
-				if (data.startAt && Array.isArray(data.startAt)) {
-					setStartAt({
-						year: String(data.startAt[0] || ""),
-						month: String(data.startAt[1] || "").padStart(2, "0"),
-						day: String(data.startAt[2] || "").padStart(2, "0"),
-						hour: String(data.startAt[3] || "00").padStart(2, "0"),
-						minute: String(data.startAt[4] || "00").padStart(2, "0")
-					});
-				}
+  const handleBack = () => {
+    navigate("/admin/AdminInven");
+  };
 
-				if (data.endAt && Array.isArray(data.endAt)) {
-					setEndAt({
-						year: String(data.endAt[0] || ""),
-						month: String(data.endAt[1] || "").padStart(2, "0"),
-						day: String(data.endAt[2] || "").padStart(2, "0"),
-						hour: String(data.endAt[3] || "00").padStart(2, "0"),
-						minute: String(data.endAt[4] || "00").padStart(2, "0")
-					});
-				}
+  if (loading) {
+    return (
+      <div className="member-Member-page">
+        <AdminSidebar />
+        <div className="member-right">
+          <p>로딩 중...</p>
+        </div>
+      </div>
+    );
+  }
 
-				setLoading(false);
-			} catch (err) {
-				console.error("티켓 정보 불러오기 실패:", err);
-				setError("티켓 정보를 불러올 수 없습니다.");
-				setLoading(false);
-			}
-		};
+  if (error) {
+    return (
+      <div className="member-Member-page">
+        <AdminSidebar />
+        <div className="member-right">
+          <p style={{ color: "red" }}>{error}</p>
+          <button
+            type="button"
+            className="admin-con-btn-4-1"
+            onClick={handleBack}
+          >
+            목록으로 돌아가기
+          </button>
+        </div>
+      </div>
+    );
+  }
 
-		fetchTicketData();
-	}, [ticketId]);
+  if (!ticket) {
+    return (
+      <div className="member-Member-page">
+        <AdminSidebar />
+        <div className="member-right">
+          <p>티켓 정보를 찾을 수 없습니다.</p>
+        </div>
+      </div>
+    );
+  }
 
-	// 수정하기 버튼 클릭
-	const handleUpdate = async (e) => {
-		e.preventDefault();
-		setLoading(true);
-		setError("");
+  const { sPrice, rPrice, avgPrice } = calcPriceInfo(ticket.price);
+  const totalSeatsAll = seatStats.reduce(
+    (sum, s) => sum + (s.totalSeats || 0),
+    0
+  );
+  const remainingSeatsAll = seatStats.reduce(
+    (sum, s) => sum + (s.remainingSeats || 0),
+    0
+  );
 
-		try {
-			const startDateTime = `${startAt.year}-${startAt.month.padStart(2, '0')}-${startAt.day.padStart(2, '0')}T${startAt.hour.padStart(2, '0')}:${startAt.minute.padStart(2, '0')}:00`;
-			const endDateTime = `${endAt.year}-${endAt.month.padStart(2, '0')}-${endAt.day.padStart(2, '0')}T${endAt.hour.padStart(2, '0')}:${endAt.minute.padStart(2, '0')}:00`;
+  return (
+    <div className="member-Member-page">
+      <AdminSidebar />
 
-			const payload = {
-			  title,
-			   category: category || data.category, 
-			  startAt: startDateTime,
-			  endAt: endDateTime,
-			  venueName,
-			  venueAddress,
-			  totalSeats: parseInt(totalSeats) || 0,
-			  price: parseFloat(price) || 0,
-			  ticketCost: ticketCost ? parseFloat(ticketCost) : null,
-			  ticketPrice: ticketPrice ? parseFloat(ticketPrice) : null,
-			  ticketStock: ticketStock ? parseInt(ticketStock) : null,
-			  ticketDetail,
-			  ageLimit,
-			  benefit,
-			  promotion,
-			  ticketStatus
-			};
+      <div className="member-right">
+        <div className="member-myTk-box2">
+          <div className="inven-main-box">
+            <h2 style={{ marginBottom: "20px" }}>티켓 재고 조회</h2>
 
-			console.log("수정 요청 데이터:", payload);
+            {/* 기본 정보 영역 : AdminInven2 와 같은 구조로 표시 */}
+            <table className="admin-member-text1">
+              <tbody>
+                <tr>
+                  <th>상품명</th>
+                  <td>{ticket.title}</td>
+                </tr>
+                <tr>
+                  <th>판매 상태</th>
+                  <td>
+                    {statusLabel[ticket.ticketStatus] || ticket.ticketStatus}
+                  </td>
+                </tr>
+                <tr>
+                  <th>카테고리</th>
+                  <td>{ticket.ticketCategory}</td>
+                </tr>
+                <tr>
+                  <th>공연 시작 일시</th>
+                  <td>{formatDateTimeArray(ticket.startAt)}</td>
+                </tr>
+                <tr>
+                  <th>공연 종료 일시</th>
+                  <td>{formatDateTimeArray(ticket.endAt)}</td>
+                </tr>
+                <tr>
+                  <th>공연 장소</th>
+                  <td>{ticket.venueName}</td>
+                </tr>
+                <tr>
+                  <th>총 좌석 수 / 잔여 좌석 수</th>
+                  <td>
+                    {ticket.totalSeats}석 / {ticket.remainingSeats}석
+                  </td>
+                </tr>
+                <tr>
+                  <th>판매 가격</th>
+                  <td>
+                    평균가 {avgPrice.toLocaleString()}원{" "}
+                    {`(S석: ${sPrice.toLocaleString()}원 / R석: ${rPrice.toLocaleString()}원)`}
+                  </td>
+                </tr>
+                <tr>
+                  <th>상품 상세설명</th>
+                  <td style={{ whiteSpace: "pre-wrap" }}>
+                    {ticket.ticketDetail || "상품 상세 설명이 없습니다."}
+                  </td>
+                </tr>
+                <tr>
+                  <th>대표 이미지</th>
+                  <td>
+                    {ticket.mainImageUrl ? (
+                      <img
+                        src={`${BASE_URL}${ticket.mainImageUrl}`}
+                        alt="대표 이미지"
+                        style={{ maxWidth: "200px" }}
+                      />
+                    ) : (
+                      "등록된 대표 이미지가 없습니다."
+                    )}
+                  </td>
+                </tr>
+                <tr>
+                  <th>상품설명 이미지</th>
+                  <td>
+                    {ticket.detailImageUrl ? (
+                      <img
+                        src={`${BASE_URL}${ticket.detailImageUrl}`}
+                        alt="상품 설명 이미지"
+                        style={{ maxWidth: "200px" }}
+                      />
+                    ) : (
+                      "등록된 상품설명 이미지가 없습니다."
+                    )}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
 
-			const token = localStorage.getItem("accessToken");
+            <br />
 
-			// PUT 요청으로 수정
-			await api.put(
-				`/tickets/${ticketId}`,
-				payload,
-				{ headers: { Authorization: `Bearer ${token}` } }
-			);
+            {/* 회차별 좌석 수 / 잔여 좌석 수 */}
+            <h3 style={{ margin: "20px 0 10px" }}>회차별 좌석 현황</h3>
+<div className="admin-seat-stats-box">
+  <table className="admin-member-text1 admin-seat-stats-table">
+    <thead>
+      <tr>
+        <th>회차</th>
+        <th>총 좌석 수</th>
+        <th>잔여 좌석 수</th>
+      </tr>
+    </thead>
+    <tbody>
+      {seatStats.length > 0 ? (
+        <>
+          {seatStats.map((s) => (
+            <tr key={s.roundNo}>
+              <td>{s.roundNo}</td>
+              <td>{s.totalSeats}</td>
+              <td>{s.remainingSeats}</td>
+            </tr>
+          ))}
+          <tr>
+            <td>
+              <strong>전체</strong>
+            </td>
+            <td>
+              <strong>{totalSeatsAll}</strong>
+            </td>
+            <td>
+              <strong>{remainingSeatsAll}</strong>
+            </td>
+          </tr>
+        </>
+      ) : (
+        <tr>
+          <td colSpan={3}>회차별 좌석 정보가 없습니다.</td>
+        </tr>
+      )}
+    </tbody>
+  </table>
+</div>
+<div >
+  <button
+    type="button"
+    className="admin-con-btn admin-inven3-back-btn"
+    onClick={handleBack}
+  >
+    목록으로
+  </button>
+</div>
 
-			alert("상품 수정 완료");
-			navigate("/admin/AdminInven");
-
-		} catch (err) {
-			console.error("수정 실패:", err);
-			setError(err.response?.data?.message || err.message);
-		} finally {
-			setLoading(false);
-		}
-	};
-
-	// 삭제하기 버튼 클릭
-	const handleDelete = async () => {
-		if (!window.confirm("상품을 삭제하겠습니다")) {
-			return;
-		}
-
-		try {
-			setLoading(true);
-			const token = localStorage.getItem("accessToken");
-
-			// DELETE 요청
-			await api.delete(
-				`/tickets/${ticketId}`,
-				{ headers: { Authorization: `Bearer ${token}` } }
-			);
-
-			alert("상품 삭제 완료");
-			navigate("/admin/AdminInven");
-
-		} catch (err) {
-			console.error("삭제 실패:", err);
-			alert("삭제 실패: " + (err.response?.data?.message || err.message));
-		} finally {
-			setLoading(false);
-		}
-	};
-
-	// 로딩 중일 때
-	if (loading) {
-		return (
-			<div className="member-Member-page">
-				<div className="member-left">
-					<div className="admin-Member-box1">
-						<strong>관리자</strong><span> 님 반갑습니다!</span>
-					</div>
-				</div>
-				<div className="member-right">
-					<p>로딩 중...</p>
-				</div>
-			</div>
-		);
-	}
-
-	return (
-		<form className="member-Member-page" onSubmit={handleUpdate}>
-			<AdminSidebar />{/* ← 공통 사이드바 호출 */}
-
-			<div className="member-right">
-				<div className="member-myTk-box2">
-					<div className="costs-main-box">
-
-						{error && (
-							<div style={{ color: 'red', marginBottom: '20px', padding: '10px', border: '1px solid red' }}>
-								❌ {error}
-							</div>
-						)}
-
-						<div className="member-conts-conBox">
-							<div className="Admin-conts-list">
-								<table className="AdConts-table">
-									<tbody>
-										<tr><th>상품명 <span style={{ color: 'red' }}>*</span></th></tr>
-										<tr><td><input type="text" className="Ad-conts-resNum" value={title} onChange={e => setTitle(e.target.value)} required /></td></tr>
-
-										<tr><th>판매 상태 <span style={{ color: 'red' }}>*</span></th></tr>
-										<tr>
-											<td>
-												<select value={ticketStatus} className="Ad-conts-resNum" onChange={e => setTicketStatus(e.target.value)}  required>
-												<option value="ON_SALE">판매중</option>
-												    <option value="SOLD_OUT">매진</option>
-												    <option value="SCHEDULED">오픈 예정</option>
-												    <option value="CLOSED">판매 종료</option>
-												</select>
-											</td>
-										</tr>
-										
-										
-										<tr><th>카테고리 <span style={{ color: 'red' }}>*</span></th></tr>
-										<tr>
-											<td>
-												<select value={category} className="Ad-conts-resNum" onChange={e => setCategory(e.target.value)} required>
-													<option value="CONCERT">콘서트</option>
-													<option value="MUSICAL">뮤지컬</option>
-													<option value="SPORTS">스포츠</option>
-													<option value="EXHIBITION">전시회</option>
-												</select>
-											</td>
-										</tr>
-
-										<tr><th>공연 시작 일시 <span style={{ color: 'red' }}>*</span></th></tr>
-										<tr>
-											<td>
-												<input type="text" placeholder="YYYY" className="admin-inven-phone1" value={startAt.year} maxLength="4" onChange={e => setStartAt({ ...startAt, year: e.target.value })} required />
-												<input type="text" placeholder="MM" className="admin-inven-phone1" value={startAt.month} maxLength="2" onChange={e => setStartAt({ ...startAt, month: e.target.value })} required />
-												<input type="text" placeholder="DD" className="admin-inven-phone1" value={startAt.day} maxLength="2" onChange={e => setStartAt({ ...startAt, day: e.target.value })} required />
-												<input type="text" placeholder="HH" className="admin-inven-phone1" value={startAt.hour} maxLength="2" onChange={e => setStartAt({ ...startAt, hour: e.target.value })} required />
-												:
-												<input type="text" placeholder="mm" className="admin-inven-phone1" value={startAt.minute} maxLength="2" onChange={e => setStartAt({ ...startAt, minute: e.target.value })} required />
-											</td>
-										</tr>
-
-										<tr><th>공연 종료 일시 <span style={{ color: 'red' }}>*</span></th></tr>
-										<tr>
-											<td>
-												<input type="text" placeholder="YYYY" className="admin-inven-phone1" value={endAt.year} maxLength="4" onChange={e => setEndAt({ ...endAt, year: e.target.value })} required />
-												<input type="text" placeholder="MM" className="admin-inven-phone1" value={endAt.month} maxLength="2" onChange={e => setEndAt({ ...endAt, month: e.target.value })} required />
-												<input type="text" placeholder="DD" className="admin-inven-phone1" value={endAt.day} maxLength="2" onChange={e => setEndAt({ ...endAt, day: e.target.value })} required />
-												<input type="text" placeholder="HH" className="admin-inven-phone1" value={endAt.hour} maxLength="2" onChange={e => setEndAt({ ...endAt, hour: e.target.value })} required />
-												:
-												<input type="text" placeholder="mm" className="admin-inven-phone1" value={endAt.minute} maxLength="2" onChange={e => setEndAt({ ...endAt, minute: e.target.value })} required />
-											</td>
-										</tr>
-
-										<tr><th>공연 장소 <span style={{ color: 'red' }}>*</span></th></tr>
-										<tr><td><input type="text" className="Ad-conts-resNum" value={venueName} onChange={e => setVenueName(e.target.value)} required /></td></tr>
-
-										<tr><th>공연장 주소</th></tr>
-										<tr><td><input type="text" className="Ad-conts-resNum" value={venueAddress} onChange={e => setVenueAddress(e.target.value)} /></td></tr>
-
-										<tr><th>총 좌석 수 <span style={{ color: 'red' }}>*</span></th></tr>
-										<tr><td><input type="number" min="1" className="Ad-conts-resNum" value={totalSeats} onChange={e => setTotalSeats(e.target.value)} required /></td></tr>
-
-										<tr><th>기본 가격 <span style={{ color: 'red' }}>*</span></th></tr>
-										<tr><td><input type="number" min="0" className="Ad-conts-resNum" value={price} onChange={e => setPrice(e.target.value)} required /></td></tr>
-
-										<tr><th>매입 원가</th></tr>
-										<tr><td><input type="number" min="0" className="Ad-conts-resNum" value={ticketCost} onChange={e => setTicketCost(e.target.value)} /></td></tr>
-
-										<tr><th>상품 상세 설명</th></tr>
-										<tr><td><textarea className="Ad-conts-resNum" value={ticketDetail} onChange={e => setTicketDetail(e.target.value)} rows="4" style={{ width: '100%' }} /></td></tr>
-
-							
-										<tr>
-											<td style={{ display: 'flex', gap: '10px' }}>
-												<button 
-													type="submit" 
-													className="conts-conts-btn1" 
-													disabled={loading}
-												>
-													{loading ? "처리 중" : "수정하기"}
-												</button>
-												<button 
-													type="button" 
-													onClick={handleDelete}
-													className="conts-conts-btn1" 
-													disabled={loading}
-												>
-													삭제하기
-												</button>
-											</td>
-										</tr>
-									</tbody>
-								</table>
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-		</form>
-	);
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 }

@@ -90,17 +90,17 @@ export default function AdminDashboard() {
 
           <div className="admin-admin-pickBox">
             <div className="admin-botom-picture">
-              <span>총 판매 수익</span>
+              <span>총 매출</span>
               <img src={Inventory1} alt="픽 1" className="admin-botom-img" />
               <p>{adminInfo.totalRevenue1 || "0"} 원</p>
             </div>
             <div className="admin-botom-picture">
-              <span>총 판매 수익</span>
+              <span>총 원가</span>
               <img src={Inventory2} alt="픽 2" className="admin-botom-img" />
               <p>{adminInfo.totalRevenue2 || "0"} 원</p>
             </div>
             <div className="admin-botom-picture">
-              <span>총 판매 수익</span>
+              <span>총 순이익</span>
               <img src={Inventory3} alt="픽 3" className="admin-botom-img1" />
               <p>{adminInfo.totalRevenue3 || "0"} 원</p>
             </div>

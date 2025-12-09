@@ -1,7 +1,9 @@
 package ticketnow.modules.order.api;
 
 
-import lombok.RequiredArgsConstructor;
+import lombok.*;
+import ticketnow.modules.order.dto.admin.AdminOrdersListItemDTO;
+import ticketnow.modules.order.dto.admin.AdminOrdersStatusUpdateRequestDTO;
 import ticketnow.modules.order.dto.OrdersCreateRequestDTO;
 
 import lombok.extern.slf4j.Slf4j;
@@ -19,7 +21,7 @@ import ticketnow.modules.order.dto.receive.ReceiveOptionSubmitDTO;
 import ticketnow.modules.order.dto.OrdersListItemDTO;
 import ticketnow.modules.order.dto.OrdersDetailDTO;
 import ticketnow.modules.order.service.OrdersService;
-
+import ticketnow.modules.order.dto.admin.AdminSalesSummaryDTO;
 // 주문(Order) API
 @Slf4j
 @RestController
@@ -118,4 +120,42 @@ public class OrdersController {
     	 log.info("[GET] /orders/{} | X-Request-Id={}", ordersId, requestId); // 접근 로깅
         return ResponseEntity.ok(ordersService.getOrdersDetail(ordersId)); // 서비스 상세 DTO 반환
     }
+    
+    // 관리자: 판매 요약 통계 
+    @GetMapping("/admin/summary")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<AdminSalesSummaryDTO> getAdminSummary() {
+        AdminSalesSummaryDTO dto = ordersService.getAdminSalesSummary();
+        return ResponseEntity.ok(dto);
+    }
+    
+    // 관리자용 주문 목록 (페이징) 
+    @GetMapping("/admin")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<PageResponseDTO<AdminOrdersListItemDTO>> getAdminOrdersList(
+            PageRequestDTO req,
+            @RequestHeader(value="X-Request-Id", required = false) String requestId) {
+
+        log.info("[GET] /orders/admin | page={} size={} | X-Request-Id={}",
+                req.getPage(), req.getSize(), requestId);
+
+        return ResponseEntity.ok(ordersService.getAdminOrdersList(req));
+    }
+
+    //  관리자용 주문 상태 변경
+    @PatchMapping("/admin/{ordersId}/status")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Void> updateOrdersStatus(
+            @PathVariable Long ordersId,
+            @RequestBody AdminOrdersStatusUpdateRequestDTO req,
+            @RequestHeader(value="X-Request-Id", required = false) String requestId) {
+
+        log.info("[PATCH] /orders/admin/{}/status | status={} | X-Request-Id={}",
+                ordersId, req.getOrdersStatus(), requestId);
+
+        ordersService.updateOrdersStatus(ordersId, req.getOrdersStatus());
+        return ResponseEntity.noContent().build();
+    }
 }
+
+

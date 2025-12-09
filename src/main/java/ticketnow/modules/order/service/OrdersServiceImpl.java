@@ -30,8 +30,8 @@ import ticketnow.modules.member.domain.MemberVO;
 import ticketnow.modules.order.domain.OrderTicketVO;
 import ticketnow.modules.order.domain.OrdersVO;
 import ticketnow.modules.order.dto.OrdersCreateRequestDTO;
-
-
+import ticketnow.modules.order.dto.admin.AdminSalesSummaryDTO;
+import ticketnow.modules.order.dto.admin.AdminOrdersListItemDTO;
  // 주문(Order) 모듈 서비스 구현체 - 비즈니스 로직/조립, 트랜잭션 관리 책임
 // 화면에 맞게 DTO를 완성해서 Controller로 반환
 @Slf4j 
@@ -181,6 +181,34 @@ public class OrdersServiceImpl implements OrdersService {
 		// 결제 완료 & 모바일티켓인 경우 QR 이미지/코드 세팅은 pay 모듈 연동 후 처리
 		return dto;
 	}
+	
+	// 관리자용 전체 매출 요약 
+    @Override
+    @Transactional(readOnly = true)
+    public AdminSalesSummaryDTO getAdminSalesSummary() {
+
+        AdminSalesSummaryDTO raw = ordersMapper.selectAdminSalesSummary();
+        if (raw == null) {
+            raw = new AdminSalesSummaryDTO();
+        }
+
+        long sales   = (raw.getTotalSalesAmount()     != null) ? raw.getTotalSalesAmount()     : 0L;
+        long qty     = (raw.getTotalTicketQuantity()  != null) ? raw.getTotalTicketQuantity()  : 0L;
+        long refund  = (raw.getTotalRefundAmount()    != null) ? raw.getTotalRefundAmount()    : 0L;
+
+        // 원가 = 판매액의 80%, 이익 = 판매액의 20%
+        long cost    = (long) Math.floor(sales * 0.8);
+        long profit  = sales - cost;
+
+        raw.setTotalSalesAmount(sales);
+        raw.setTotalTicketQuantity(qty);
+        raw.setTotalRefundAmount(refund);
+        raw.setTotalCostAmount(cost);
+        raw.setTotalProfitAmount(profit);
+
+        return raw;
+    }
+
 
 
 	// 결제 준비 (결제하기 버튼 클릭)
@@ -277,5 +305,34 @@ public class OrdersServiceImpl implements OrdersService {
 			return null;
 		}
 	}
+	
+	  //  관리자용 전체 주문 목록 (페이징) ======
+    @Override
+    @Transactional(readOnly = true)
+    public PageResponseDTO<AdminOrdersListItemDTO> getAdminOrdersList(PageRequestDTO req) {
+        log.debug("[Service] getAdminOrdersList page={} size={}", req.getPage(), req.getSize());
+
+        int offset = req.getOffset();
+        int limit  = req.getLimit();
+
+        PageResponseDTO<AdminOrdersListItemDTO> res = new PageResponseDTO<>();
+        res.setList(ordersMapper.selectAdminOrdersList(offset, limit));
+        res.setTotalCount(ordersMapper.countAdminOrders());
+        res.setPage(req.getPage());
+        res.setSize(req.getSize());
+
+        return res;
+    }
+
+    // 주문 상태 변경 ======
+    @Override
+    @Transactional
+    public void updateOrdersStatus(Long ordersId, String ordersStatus) {
+        log.info("[Service] updateOrdersStatus ordersId={} status={}", ordersId, ordersStatus);
+        int updated = ordersMapper.updateOrdersStatus(ordersId, ordersStatus);
+        if (updated == 0) {
+            throw new ResourceNotFoundException("주문을 찾을 수 없습니다: " + ordersId);
+        }
+    }
 
 }

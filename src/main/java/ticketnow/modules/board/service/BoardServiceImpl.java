@@ -27,7 +27,7 @@ import ticketnow.modules.common.mapper.image.ImageMapper;
 import ticketnow.modules.common.service.image.FileService;
 
 import ticketnow.modules.member.domain.MemberVO;
-
+import ticketnow.modules.member.mapper.MemberMapper;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -44,7 +44,7 @@ public class BoardServiceImpl implements BoardService {
     private final BoardMapper boardMapper;      // 게시글/댓글용 매퍼 
     private final ImageMapper imageMapper;      // 이미지 조회용 매퍼    
     private final FileService fileService;      // 업로드/메타 수정/삭제 서비스 
-
+    private final MemberMapper memberMapper;	 // 회원 정보 조회용 매퍼
     // ====== 유틸: MultipartFile -> NewImageDTO 변환 (BOARD_IMAGE 기본) ======
     private List<NewImageDTO> toNewImageDTOs(List<org.springframework.web.multipart.MultipartFile> files) {
         if (files == null) return null;
@@ -66,7 +66,7 @@ public class BoardServiceImpl implements BoardService {
     private List<ImageDTO> toImageDTOs(List<ImageVO> list) {
         if (list == null) return List.of();
         return list.stream().map(vo -> ImageDTO.builder()
-                        .imageUrl(vo.getImageUrl())
+                        .imageUrl(vo.getImgUrl())
                         .isPrimary(vo.getIsPrimary())
                         .imageSort(vo.getImageSort())
                         .imageType(vo.getImageType() != null ? vo.getImageType().name() : null)
@@ -269,7 +269,6 @@ public class BoardServiceImpl implements BoardService {
     }
 
     // ===== 상세(관리자) =====
-    @Override
     public InquiryDetailDTO getAdminInquiryDetail(Long boardId) {
     	// 디버그 로깅
         log.info("[SERVICE] getAdminInquiryDetail | boardId={}", boardId);
@@ -281,19 +280,38 @@ public class BoardServiceImpl implements BoardService {
 
         List<ImageVO> boardImgs = imageMapper.selectImagesByBoard(boardId);
         List<ReplyVO> replies = boardMapper.selectReplies(boardId);
-        List<ReplyItemDTO> replyDTOs = replies.stream().map(this::toReplyItemDTO).collect(Collectors.toList());
+        List<ReplyItemDTO> replyDTOs = replies.stream()
+                .map(this::toReplyItemDTO)
+                .collect(Collectors.toList());
 
-        String writerId = (board.getMember() != null) ? board.getMember().getMemberId() : null;
-        String email = (board.getMember() != null) ? board.getMember().getMemberEmail() : null;
-        String phone = (board.getMember() != null) ? board.getMember().getMemberPhone() : null;
+        // 작성자 ID
+        String writerId = (board.getMember() != null)
+                ? board.getMember().getMemberId()
+                : null;
+
+        // 이메일/전화번호는 MemberMapper 로 한 번 더 조회해서 채우기
+        String email = null;
+        String phone = null;
+
+        if (writerId != null) {
+            MemberVO member = memberMapper.selectMemberById(writerId);
+            if (member != null) {
+                email = member.getMemberEmail();
+                phone = member.getMemberPhone();
+            }
+        }
 
         return InquiryDetailDTO.builder()
                 .boardId(board.getBoardId())
                 .memberId(writerId)
-                .email(email)   // 조인 결과 없으면 null
-                .phone(phone)   // 조인 결과 없으면 null
+                .email(email)   // 회원 정보에서 가져온 이메일
+                .phone(phone)   // 회원 정보에서 가져온 연락처
                 .title(board.getBoardTitle())
-                .categoryType(board.getCategoryType() != null ? board.getCategoryType().name() : null)
+                .categoryType(
+                        board.getCategoryType() != null
+                                ? board.getCategoryType().name()
+                                : null
+                )
                 .orderTicketId(null) // 스키마 컬럼 없음
                 .content(board.getBoardContent())
                 .replyCount(replyCount)
@@ -305,6 +323,7 @@ public class BoardServiceImpl implements BoardService {
                 .replies(replyDTOs)
                 .build();
     }
+
 
     // ===== 댓글 생성(관리자) =====
     @Transactional

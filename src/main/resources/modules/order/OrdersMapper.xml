@@ -224,6 +224,40 @@
     LIMIT 1
   </select>
   
+   <!-- ====== 관리자용 전체 주문 목록 (페이징) ====== -->
+  <select id="selectAdminOrdersList"
+          resultType="ticketnow.modules.order.dto.admin.AdminOrdersListItemDTO">
+    SELECT
+      o.orders_id AS ordersId,
+      DATE_FORMAT(o.created_at, '%Y-%m-%d %H:%i') AS orderDate,
+      t.ticket_title AS ticketTitle,
+      SUM(ot.order_quantity) AS ticketQuantity,
+      o.orders_total_amount AS totalAmount,
+      o.orders_status AS ordersStatus,
+      p.pay_status AS payStatus
+    FROM orders o
+    JOIN order_ticket ot ON ot.orders_id = o.orders_id
+    JOIN seat s          ON s.seat_id    = ot.seat_id
+    JOIN ticket t        ON t.ticket_id  = s.ticket_id
+    LEFT JOIN pay p      ON p.orders_id  = o.orders_id
+    GROUP BY o.orders_id
+    ORDER BY o.created_at DESC
+    LIMIT #{limit} OFFSET #{offset}
+  </select>
+
+  <!-- ======  관리자용 전체 주문 카운트 ====== -->
+  <select id="countAdminOrders" resultType="long">
+    SELECT COUNT(DISTINCT o.orders_id)
+    FROM orders o
+  </select>
+
+  <!-- ======  주문 상태 변경 ====== -->
+  <update id="updateOrdersStatus">
+    UPDATE orders
+    SET orders_status = #{ordersStatus}
+    WHERE orders_id = #{ordersId}
+  </update>
+  
      <!-- 티켓 주문ID -> ticket_id (대표 1건) -->
    <select id="selectTicketIdByOrdersId" parameterType="long" resultType="long">
      SELECT s.ticket_id
@@ -234,6 +268,44 @@
      ORDER BY ot.order_ticket_id ASC
      LIMIT 1
    </select>
+  
+    <!-- 8) 관리자용 전체 매출 요약 (AdminInven 통계용)
+       - 판매 티켓 수량 / 판매액 : orders_status = 'PAID'
+       - 환불 금액 : orders_status = 'REFUNDED'
+  -->
+  <select id="selectAdminSalesSummary"
+          resultType="ticketnow.modules.order.dto.admin.AdminSalesSummaryDTO">
+    SELECT
+      COALESCE(
+        SUM(
+          CASE
+            WHEN o.orders_status = 'PAID'
+              THEN o.orders_ticket_quantity
+            ELSE 0
+          END
+        ), 0
+      ) AS totalTicketQuantity,
+      COALESCE(
+        SUM(
+          CASE
+            WHEN o.orders_status = 'PAID'
+              THEN o.orders_total_amount
+            ELSE 0
+          END
+        ), 0
+      ) AS totalSalesAmount,
+      COALESCE(
+        SUM(
+          CASE
+            WHEN o.orders_status = 'REFUNDED'
+              THEN o.orders_total_amount
+            ELSE 0
+          END
+        ), 0
+      ) AS totalRefundAmount
+    FROM orders o
+  </select>
+
   
 
 </mapper>

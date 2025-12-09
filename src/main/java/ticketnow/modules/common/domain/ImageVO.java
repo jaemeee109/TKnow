@@ -19,7 +19,7 @@ public class ImageVO extends BaseVO {
     private String imageExt;       // 이미지확장자
     private String orginName;      // 원본파일명  (schema는 orgin_name)
     private String fileName;       // 저장파일명
-    private String imageUrl;       // 접근URL
+    private String imgUrl;       // 접근URL
     private ImageType imageType;   // 이미지용도
     private Integer imageSort;     // 정렬순서
     private Boolean isPrimary;     // 대표이미지

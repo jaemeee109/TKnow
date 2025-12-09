@@ -19,4 +19,5 @@ public class SeatVO {
     private String seatClass;            // 좌석등급
     private LocalDateTime holdUntil;     // 선점만료시간
     private MemberVO holdSeatMember;     // 좌석선점자 (FK: member_id)
+    private Integer roundNo;     // 공연 회차 번호 (1회차, 2회차...)
 }

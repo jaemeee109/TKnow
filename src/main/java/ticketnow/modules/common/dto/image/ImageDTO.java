@@ -8,7 +8,7 @@ import lombok.*;
 
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
 public class ImageDTO {
-    private String imageUrl;
+	private String imageUrl;
     private Boolean isPrimary;
     private Integer imageSort;
     private String imageType; // enum 문자열 (예: "BOARD_IMAGE")

@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
@@ -15,6 +16,9 @@ import ticketnow.modules.common.dto.paging.PageRequestDTO;
 import ticketnow.modules.common.dto.paging.PageResponseDTO;
 import ticketnow.modules.ticket.dto.*;
 import ticketnow.modules.ticket.service.TicketService;
+import java.util.List;
+import ticketnow.modules.ticket.dto.SeatDetailDTO;
+import java.util.List;
 
 /**
  * 티켓(Ticket) CRUD REST 컨트롤러 - 계층 역할: HTTP 요청 수신 → DTO 바인딩/검증 → Service 위임 → 응답
@@ -37,8 +41,8 @@ public class TicketController {
 	 * 입력값 로그
 	 */
 	@PreAuthorize("hasAnyRole('USER','ADMIN')")
-	@PostMapping
-	public ResponseEntity<TicketResponseDTO> create(@Valid @RequestBody TicketCreateRequestDTO req) {
+	@PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE) // ★ multipart/form-data 로 이미지+텍스트 함께 수신
+	public ResponseEntity<TicketResponseDTO> create(@Valid @ModelAttribute TicketCreateRequestDTO req) { // ★ @RequestBody -> @ModelAttribute
 		// 운영 추적: 어떤 티켓을 생성하려는지 간략 로그
 		log.info("[POST] /tickets | title={}", req.getTitle());
 		// 서비스에 위임(트랜잭션 내부에서 insert → select)
@@ -77,22 +81,36 @@ public class TicketController {
 	}
 
 	/**
-	 * 티켓 수정(부분 수정 허용) PUT /tickets/{ticketId} - 입력: PathVariable +
-	 * TicketUpdateRequestDTO(바디 JSON) - 정책: DTO의 null 필드는 변경하지 않음(서비스에서 Partial
-	 * Update 적용) - 검증: @Valid (필드 제약 조건 위반 시 400)
+	 * 티켓 수정(부분 수정 허용) PUT /tickets/{ticketId}
+	 * - 입력: PathVariable + TicketUpdateRequestDTO(multipart/form-data)
+	 * - 정책: DTO의 null 필드는 변경하지 않음(서비스에서 Partial Update 적용)
+	 * - 검증: @Valid (필드 제약 조건 위반 시 400)
 	 */
 	@PreAuthorize("hasAnyRole('USER','ADMIN')")
-	@PutMapping("/{ticketId}")
+	@PutMapping(value = "/{ticketId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public ResponseEntity<TicketResponseDTO> update(@PathVariable @NotNull Long ticketId,
-			@Valid @RequestBody TicketUpdateRequestDTO req) {
-		// 어떤 필드가 들어왔는지 요약 로그(객체 toString)
-		log.info("[PUT] /tickets/{} | fields={}", ticketId, req);
-		TicketResponseDTO updated = ticketService.updateTicket(ticketId, req);
-		return ResponseEntity.ok(updated);
+	        @Valid @ModelAttribute TicketUpdateRequestDTO req) {
+	    // 어떤 필드가 들어왔는지 요약 로그(객체 toString)
+	    log.info("[PUT] /tickets/{} | fields={}", ticketId, req);
+	    TicketResponseDTO updated = ticketService.updateTicket(ticketId, req);
+	    return ResponseEntity.ok(updated);
 	}
+    /**
+     * 특정 티켓의 회차별 좌석 통계 조회 (관리자용)
+     * GET /tickets/{ticketId}/seats/stats
+     */
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/{ticketId}/seats/stats")
+    public ResponseEntity<List<SeatStatsDTO>> getSeatStats(
+            @PathVariable @NotNull Long ticketId) {
+
+        log.info("[GET] /tickets/{}/seats/stats", ticketId);
+        List<SeatStatsDTO> stats = ticketService.getSeatStats(ticketId);
+        return ResponseEntity.ok(stats);
+    }
 
 	/**
-	 * 티켓 삭제(소프트 삭제) DELETE /tickets/{ticketId} - 정책: 실제 삭제 대신 deleted_at 타임스탬프 갱신 -
+	 * 티켓 삭제 DELETE /tickets/{ticketId}
 	 * 응답: 본문 없이 200 OK(또는 204 No Content 사용 가능)
 	 */
 	@PreAuthorize("hasAnyRole('USER','ADMIN')")
@@ -103,4 +121,29 @@ public class TicketController {
 		ticketService.deleteTicket(ticketId);
 		return ResponseEntity.ok().build();
 	}
+    /**
+     * 티켓별 회차/등급 좌석 잔여석 요약 (TicketBuy 좌석 정보 표기용)
+     */
+    @PreAuthorize("permitAll()")
+    @GetMapping("/{ticketId}/seats/summary")
+    public ResponseEntity<List<SeatSummaryDTO>> getSeatSummary(
+            @PathVariable("ticketId") Long ticketId
+    ) {
+        return ResponseEntity.ok(ticketService.getSeatSummary(ticketId));
+    }
+
+    /**
+     * 좌석 상세 목록 조회 (좌석 선택 화면용)
+     * 예) GET /api/tickets/28/seats?roundNo=1&zone=F2
+     */
+    @GetMapping("/{ticketId}/seats")
+    public ResponseEntity<List<SeatDetailDTO>> getSeatsForZone(
+            @PathVariable("ticketId") Long ticketId,
+            @RequestParam(name = "roundNo", required = false) Integer roundNo,
+            @RequestParam(name = "zone") String zone
+    ) {
+        List<SeatDetailDTO> seats = ticketService.getSeatsForZone(ticketId, roundNo, zone);
+        return ResponseEntity.ok(seats);
+    }
+
 }

@@ -296,32 +296,32 @@ export default function AdminInven() {
         {/* 하단: 판매 통계 카드 */}
         <div className="inven-main-box2">
           <div className="admin-inven-tit">
-            <h3>판매 통계</h3>
+            <h3>종합 판매 통계</h3>
           </div>
 
           <div className="admin-inven-row">
-            <span>판매 티켓 수량</span>
+            <span>판매 티켓</span>
             <span className="admin-inven-3">
               {formatNumber(summary.totalTicketQuantity)} 장
             </span>
           </div>
 
           <div className="admin-inven-row">
-            <span>판매액</span>
+            <span>매출액</span>
             <span className="admin-inven-3">
               {formatNumber(summary.totalSalesAmount)} 원
             </span>
           </div>
 
           <div className="admin-inven-row">
-            <span>매출 원가</span>
+            <span>원가비용</span>
             <span className="admin-inven-3">
               {formatNumber(summary.totalCostAmount)} 원
             </span>
           </div>
     
           <div className="admin-inven-row">
-            <span>매출 이익</span>
+            <span>영업 이익</span>
             <span className="admin-inven-3">
               {formatNumber(summary.totalProfitAmount)} 원
             </span>

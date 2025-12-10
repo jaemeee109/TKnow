@@ -103,19 +103,8 @@ export default function MemberSidebar() {
                 </Link>
               </td>
             </tr>
-            <tr>
-              <td><Link
-                  to="/member/OftenContact"
-                  className={
-                    current === "faq"
-                      ? "member-Member-click"
-                      : "member-Member"
-                  }
-                >고객센터</Link></td>
-            </tr>
-            <tr>
-              <td>공지사항</td>
-            </tr>
+            
+            
           </tbody>
         </table>
 
@@ -134,7 +123,7 @@ export default function MemberSidebar() {
 
         <br />
         <br />
-        <span className="member-box1-logout">로그아웃</span>
+       
       </div>
     </div>
   );

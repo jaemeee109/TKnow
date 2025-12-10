@@ -61,13 +61,7 @@ export default function AdminSidebar({ adminName }) {
               </td>
             </tr>
 
-            {/* 보안/공지 */}
-            <tr><td>보안 관리</td></tr>
-            <tr>
-              <td>공지사항 관리</td>
-              <td className="admin-btn">공지 등록</td>
-            </tr>
-
+   
             {/* 1:1 문의 관리 */}
             <tr>
               <td>

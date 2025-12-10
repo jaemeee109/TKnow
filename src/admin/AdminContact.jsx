@@ -203,7 +203,7 @@ export default function AdminContactDetail() {
 
                     <tr>
                       <th>문의 유형</th>
-                      <th>예약번호</th>
+                    
                     </tr>
                     <tr>
                       <td>
@@ -214,14 +214,7 @@ export default function AdminContactDetail() {
                           readOnly
                         />
                       </td>
-                      <td>
-                        <input
-                          type="text"
-                          className="admin-cont-phone2"
-                          value={board.orderTicketId || ""}
-                          readOnly
-                        />
-                      </td>
+                      
                     </tr>
 
                     <tr>

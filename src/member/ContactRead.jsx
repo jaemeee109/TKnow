@@ -190,21 +190,7 @@ export default function Contact() {
 											</td>
 										</tr>
 
-										<tr>
-											<th>예약번호</th>
-											<td>
-												<input
-													type="number"
-													className="conts-resNum"
-													value={orderTicketId}
-													onChange={(e) => setOrderTicketId(e.target.value)}
-												/>
-												&nbsp;&nbsp;&nbsp;
-												<button type="button" className="conts-resNumBtn">
-													예약번호 조회
-												</button>
-											</td>
-										</tr>
+										
 
 										<tr>
 											<th>문의 제목</th>

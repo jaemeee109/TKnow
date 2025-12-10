@@ -714,3 +714,122 @@
   font-size: 13px;
   color: #555;
 }
+/* ============================
+   AdminOrdersDetail 상단 카드 조정
+   ============================ */
+.admin-orders-detail-page .member-tkRead-conBox2 {
+  height: 420px;         
+  min-height: 0;
+  padding: 40px;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 40px;             /* 이미지 ↔ 정보 텍스트 사이 간격 */
+}
+/* 이미지 영역 크기 고정 */
+.admin-orders-detail-page .member-tkRead-dayBox1 img {
+  width: 200px;
+  height: auto;
+  border-radius: 8px;
+  margin-top: 30px;
+  margin-left: 20px;
+}
+
+/* 오른쪽 정보 영역이 나머지 공간 채우도록 */
+.admin-orders-detail-page .member-tkRead-dayBox2 {
+  flex: 1;
+  text-align: left;      /* 텍스트 왼쪽 정렬 */
+}
+.border-line {
+  border-bottom: 1px solid #D9D9D9;   /* 연한 회색선 */
+  margin: 15px 0;                     /* 위·아래 간격 */
+}
+.admin-orders-detail-page .member-tkRead-conBox3 {
+  height: autopx;         
+  min-height: 0;
+  padding: 40px;
+  align-items: start;
+  justify-content: start;
+}
+/* 첫 번째 박스(기본 정보) 텍스트 줄간격/폰트 설정 */
+.admin-orders-detail-page .member-tkRead-dayBox2 strong {
+  display: block;
+  font-size: 18px;
+  margin-bottom: 8px;
+  color: #000;
+}
+
+.admin-orders-detail-page .member-tkRead-dayBox2 p {
+  margin: 4px 0;
+  line-height: 1.6;   /* ← 줄간격 */
+  font-size: 16px;
+  color: #555;
+}
+
+/* 예매번호·예매일시 등 테이블 부분 줄간격/폰트 */
+.admin-orders-detail-page .member-tkRead-dayBox2 tr th,
+.admin-orders-detail-page .member-tkRead-dayBox2 tr td {
+  padding: 2px 6px;
+  font-size: 15px;
+  color: #555;
+}
+/* 두 번째 박스(취소 정책) 전체 정렬/줄간격 */
+.admin-orders-detail-page .member-tkRead-conBox3 {
+  min-height: 0;
+  padding: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+/* 취소 안내 테이블 공통 */
+.admin-orders-detail-page .member-tkRead-text1-1 {
+  width: 100%;
+  border-spacing: 8px 12px;
+}
+
+.admin-orders-detail-page .member-tkRead-text1-1 th,
+.admin-orders-detail-page .member-tkRead-text1-1 td {
+  text-align: center;
+}
+
+/* 1줄째: "취소 가능 기한" */
+.admin-order-cancel-deadline {
+  font-size: 16px;
+  color: #555;
+}
+
+/* 2줄째: "* 취소 수수료 정책 *" */
+.admin-order-cancel-title {
+  font-size: 18px;
+  color: #FFA6C9;
+  font-weight: bold;
+  padding-top: 6px;
+}
+
+/* 내용 줄들 폰트/색/줄간격 */
+.admin-order-cancel-td .admin-order-cancel-body p {
+  margin: 4px 0;
+  line-height: 1.6;   /* 줄간격 */
+  font-size: 14px;
+  color: #808080;
+}
+/* 주문 상세: 목록으로 돌아가기 버튼 정렬/크기 */
+.admin-orders-detail-back {
+  text-align: center;     /* 가운데 정렬 */
+  margin-top: 20px;
+  margin-left: 280px;
+}
+
+.admin-orders-detail-page .admin-orders-back-btn {
+  min-width: 180px;       /* 버튼 가로 크기 */
+  padding: 10px 24px;     /* 세로/가로 여백 */
+  font-size: 18px;        /* 글자 크기 */
+  line-height: 24px;
+  border-radius: 12px;    /* 둥근 정도 */
+  border: 1px #f3f3f3 solid;
+  height: 50px;
+  text-align: center;
+  justify-content: center;
+  font-weight: 500;
+}

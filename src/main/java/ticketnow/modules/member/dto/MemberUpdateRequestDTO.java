@@ -7,7 +7,7 @@ import javax.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-
+import ticketnow.modules.member.constant.MemberRole;
 /**
  * 회원 수정 요청 DTO
  * - 부분 수정(Partial Update) 가정: null 인 필드는 변경하지 않음
@@ -27,4 +27,6 @@ public class MemberUpdateRequestDTO {
     private String memberZip;
     private String memberAddr1;
     private String memberAddr2;
+    
+    private MemberRole memberRole;
 }

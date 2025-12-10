@@ -25,7 +25,7 @@ public class OrdersDetailDTO {
     private String ticketDate;          // 공연 날짜 (TicketVO.ticketDate)
     private String showStartTime;     // 공연 시작시간 (프론트용)
     private String ticketVenue;       // 공연 장소 (프론트용)
-
+    private String memberEmail;		// 예매자 이메일
     private String seatClass;   // 좌석등급
     private String seatCode;    // 좌석구역
     private String seatNumber;  // 좌석번호(프론트 용)
@@ -55,4 +55,6 @@ public class OrdersDetailDTO {
     // =================== 시간 =================== 
     private LocalDateTime createdAt;     // 주문 생성일 (OrdersVO extends BaseVO ⇒ createdAt)
     private LocalDateTime updatedAt;     // 주문 수정일 (OrdersVO extends BaseVO ⇒ updatedAt)
+    
+
 }

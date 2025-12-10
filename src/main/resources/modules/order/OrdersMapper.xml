@@ -133,28 +133,32 @@
     LIMIT 1
   </select>
 
-  <!-- 5) 구매내역 목록(회원별, 페이징) -->
-  <select id="selectOrdersListByMember"
-          resultType="ticketnow.modules.order.dto.OrdersListItemDTO">
-    SELECT
-      /* 제목/장소/일시 */
-      t.ticket_title                             AS ticketTitle,
-      NULL                                       AS ticketVenue,       -- [표시용]
-      DATE_FORMAT(t.ticket_date, '%Y-%m-%d')     AS ticketDate,
-      DATE_FORMAT(t.ticket_date, '%H:%i')        AS showStartTime,
-      /* D-DAY 문구 */
-      CONCAT('공연 ', GREATEST(DATEDIFF(t.ticket_date, NOW()), 0), '일 전') AS ddayText,
-      /* 상세 이동용 주문ID */
-      o.orders_id                                AS ordersId
-    FROM orders o
-    JOIN order_ticket ot ON ot.orders_id = o.orders_id
-    JOIN seat s          ON s.seat_id    = ot.seat_id
-    JOIN ticket t        ON t.ticket_id  = s.ticket_id
-    WHERE o.member_id = #{memberId}
-    GROUP BY o.orders_id
-    ORDER BY o.created_at DESC
-    LIMIT #{limit} OFFSET #{offset}
-  </select>
+     <!-- 5) 구매내역 목록(회원별, 페이징) -->
+    <select id="selectOrdersListByMember"
+            resultType="ticketnow.modules.order.dto.OrdersListItemDTO">
+      SELECT
+        /* 제목/장소/일시 */
+        t.ticket_title                             AS ticketTitle,
+        t.venueName                                AS ticketVenue,
+        DATE_FORMAT(ts.show_at, '%Y-%m-%d')        AS ticketDate,
+        DATE_FORMAT(ts.show_at, '%H:%i')           AS showStartTime,
+        /* D-DAY 문구 */
+        CONCAT('공연 ', GREATEST(DATEDIFF(ts.show_at, NOW()), 0), '일 전') AS ddayText,
+        /* 상세 이동용 주문ID */
+        o.orders_id                                AS ordersId
+      FROM orders o
+      JOIN order_ticket ot ON ot.orders_id = o.orders_id
+      JOIN seat s          ON s.seat_id    = ot.seat_id
+      JOIN ticket t        ON t.ticket_id  = s.ticket_id
+      JOIN ticket_schedule ts
+                           ON ts.ticket_id = t.ticket_id
+                          AND ts.round_no  = s.round_no
+      WHERE o.member_id = #{memberId}
+      GROUP BY o.orders_id
+      ORDER BY o.created_at DESC
+      LIMIT #{limit} OFFSET #{offset}
+    </select>
+
 
   <!-- 6) 목록 카운트 -->
   <select id="countOrdersByMember" resultType="long">
@@ -164,7 +168,8 @@
     WHERE o.member_id = #{memberId}
   </select>
 
-  <!-- 7) 구매내역 상세 -->
+
+    <!-- 7) 구매내역 상세 -->
   <select id="selectOrdersDetail"
           parameterType="long"
           resultType="ticketnow.modules.order.dto.OrdersDetailDTO">
@@ -177,7 +182,7 @@
       t.ticket_title         AS ticketTitle,
       DATE_FORMAT(t.ticket_date, '%Y-%m-%d') AS ticketDate,
       DATE_FORMAT(t.ticket_date, '%H:%i')    AS showStartTime,
-     t.venueName AS ticketVenue,
+      t.venueName AS ticketVenue,
 
       s.seat_class           AS seatClass,
       s.seat_code            AS seatCode,
@@ -190,11 +195,11 @@
       NULL                   AS qrCodeNumber,
 
       /* 결제/정산 */
-      o.orders_status        AS ordersStatus,
-      p.pay_status           AS payStatus,
-      p.pay_method           AS payMethod,
-      ot.order_price         AS ticketPrice,
-      0                      AS serviceFee,          -- [변경 가능]
+      o.orders_status          AS ordersStatus,
+      p.pay_status             AS payStatus,
+      p.pay_method             AS payMethod,
+      ot.order_price           AS ticketPrice,
+      0                        AS serviceFee,          -- [변경 가능]
       o.orders_ticket_quantity AS quantity,
       o.orders_total_amount    AS totalPayAmount,
 
@@ -209,9 +214,10 @@
       o.created_at           AS createdAt,
       o.updated_at           AS updatedAt,
 
-      /* 예매자 표시용 */
-      m.member_name          AS memberName,
-      m.member_phone AS memberPhone
+      /* 회원 표시 정보 */
+      m.member_name  AS memberName,
+      m.member_phone AS memberPhone,
+      m.member_email AS memberEmail
 
     FROM orders o
     JOIN order_ticket ot ON ot.orders_id = o.orders_id
@@ -223,7 +229,7 @@
     ORDER BY ot.order_ticket_id ASC
     LIMIT 1
   </select>
-  
+
    <!-- ====== 관리자용 전체 주문 목록 (페이징) ====== -->
   <select id="selectAdminOrdersList"
           resultType="ticketnow.modules.order.dto.admin.AdminOrdersListItemDTO">

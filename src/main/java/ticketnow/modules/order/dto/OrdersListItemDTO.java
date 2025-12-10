@@ -9,6 +9,8 @@ import ticketnow.modules.common.dto.image.ImageDTO;
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
 public class OrdersListItemDTO {
 
+	// 티켓 대표 이미지 URL (썸네일)
+    private String ticketImageUrl;
    
     private ImageDTO ticketThumbnail; // 썸네일
 
@@ -23,4 +25,6 @@ public class OrdersListItemDTO {
 
   
     private Long ordersId; // 주문서번호
+    
+ 
 }

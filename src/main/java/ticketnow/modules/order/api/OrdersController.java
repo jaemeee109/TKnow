@@ -2,6 +2,7 @@ package ticketnow.modules.order.api;
 
 
 import lombok.*;
+import ticketnow.modules.order.constant.OrdersStatus; 
 import ticketnow.modules.order.dto.admin.AdminOrdersListItemDTO;
 import ticketnow.modules.order.dto.admin.AdminOrdersStatusUpdateRequestDTO;
 import ticketnow.modules.order.dto.OrdersCreateRequestDTO;
@@ -112,6 +113,25 @@ public class OrdersController {
         return ResponseEntity.ok(ordersService.getOrdersList(memberId, req)); // 서비스 페이징 결과 반환
     }
 
+ // [GET] /orders/member/{memberId} | 관리자용: 특정 회원 주문 목록 조회
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/member/{memberId}")
+    public ResponseEntity<PageResponseDTO<OrdersListItemDTO>> getOrdersListByMember(
+            @PathVariable("memberId") String memberId,
+            @RequestParam(name = "page", defaultValue = "1") int page,
+            @RequestParam(name = "size", defaultValue = "5") int size
+    ) {
+        // PageRequestDTO 구성
+        PageRequestDTO req = new PageRequestDTO();
+        req.setPage(page);
+        req.setSize(size);
+
+        // 지정한 memberId 기준으로 주문 목록 조회
+        PageResponseDTO<OrdersListItemDTO> res = ordersService.getOrdersList(memberId, req);
+
+        return ResponseEntity.ok(res);
+    }
+
     // 구매내역 상세
     @PreAuthorize("hasAnyRole('USER','ADMIN')")
     @GetMapping("/{ordersId}")
@@ -119,6 +139,19 @@ public class OrdersController {
     		 @RequestHeader(value="X-Request-Id", required=false) String requestId) {
     	 log.info("[GET] /orders/{} | X-Request-Id={}", ordersId, requestId); // 접근 로깅
         return ResponseEntity.ok(ordersService.getOrdersDetail(ordersId)); // 서비스 상세 DTO 반환
+    }
+    
+    // 회원용 주문취소
+    @PatchMapping("/{ordersId}/cancel")
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<Void> cancelMyOrder(@PathVariable Long ordersId) {
+
+        // TODO: 필요하면 나중에 서비스에서
+        //  - 본인 주문인지,
+        //  - 공연 시간이 지났는지 등을 검증하도록 확장
+        ordersService.updateOrdersStatus(ordersId, OrdersStatus.CANCELED.name());
+
+        return ResponseEntity.noContent().build();
     }
     
     // 관리자: 판매 요약 통계 

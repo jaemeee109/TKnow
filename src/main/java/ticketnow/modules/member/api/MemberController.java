@@ -32,6 +32,8 @@ import ticketnow.modules.common.dto.image.ImageDTO;
 import ticketnow.modules.common.dto.image.ImageListDTO;
 import ticketnow.modules.common.dto.image.NewImageDTO;
 import ticketnow.modules.common.service.image.FileService;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * 회원(Member) 관련 CRUD API
@@ -206,6 +208,25 @@ public class MemberController {
 
         return ResponseEntity.ok(resp);
     }
+    
+ // [GET] /members/admin/{memberId}/tickets/refunds
+ // - 관리자용: 특정 회원의 취소/환불 요약 정보 (현재는 기본값 0으로 응답)
+ @PreAuthorize("hasRole('ADMIN')")
+ @GetMapping("/admin/{memberId}/tickets/refunds")
+ public ResponseEntity<Map<String, Object>> getMemberTicketsRefundSummary(
+         @PathVariable("memberId") String memberId
+ ) {
+     Map<String, Object> body = new HashMap<>();
+
+     // 기본 정보 (현재 UI에서 이 값들을 사용하진 않음)
+     body.put("memberId", memberId);
+     body.put("refundedOrdersCount", 0);   // 환불 완료 주문 개수
+     body.put("refundedTotalAmount", 0);   // 환불 완료 금액 합계
+
+     // 필요 시 나중에 취소 요청 건수/금액 등을 여기 추가 가능
+     return ResponseEntity.ok(body);
+ }
+
     
 }
 

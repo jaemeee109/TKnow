@@ -26,6 +26,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
+
 import ticketnow.modules.member.domain.MemberVO;
 import ticketnow.modules.order.domain.OrderTicketVO;
 import ticketnow.modules.order.domain.OrdersVO;
@@ -147,17 +149,38 @@ public class OrdersServiceImpl implements OrdersService {
 	@Override
 	@Transactional(readOnly = true)
 	public PageResponseDTO<OrdersListItemDTO> getOrdersList(String memberId, PageRequestDTO req) {
-		// PageRequestDTO는 (page, size)로부터 offset/limit을 계산해주는 공용 DTO
-		 log.debug("[Service] getOrdersList memberId={} page={} size={}", memberId, req.getPage(), req.getSize()); // 디버그 로깅
-		int offset = req.getOffset(); // 패이지 시작 위치 계산
-		int limit = req.getLimit(); // 한 페이지당 개수 계산
+	    // PageRequestDTO는 (page, size)로부터 offset/limit을 계산해주는 공용 DTO
+	    log.debug("[Service] getOrdersList memberId={} page={} size={}", memberId, req.getPage(), req.getSize());
 
-		PageResponseDTO<OrdersListItemDTO> res = new PageResponseDTO<>(); // 응답 DTO 생성
-		res.setList(ordersMapper.selectOrdersListByMember(memberId, offset, limit)); // 목록 데이터
-		res.setTotalCount(ordersMapper.countOrdersByMember(memberId)); // 총 건수
-		res.setPage(req.getPage()); // 현재 페이지
-		res.setSize(req.getSize()); // 페이지 크기
-		return res; 
+	    // 페이징용 offset / limit 계산
+	    int offset = req.getOffset(); // 페이지 시작 위치
+	    int limit  = req.getLimit();  // 한 페이지당 개수
+
+	    // 1) 목록 데이터 조회
+	    List<OrdersListItemDTO> rows =
+	            ordersMapper.selectOrdersListByMember(memberId, offset, limit);
+
+	    // 2) 각 항목에 티켓 썸네일 주입
+	    if (rows != null) {
+	        for (OrdersListItemDTO row : rows) {
+	            if (row != null && row.getOrdersId() != null) {
+	                // 주문 ID 기준으로 ticket_id → 대표 이미지 조회 후 DTO에 세팅
+	                injectTicketThumbnailInto(row, row.getOrdersId());
+	            }
+	        }
+	    }
+
+	    // 3) 총 건수 조회
+	    long totalCount = ordersMapper.countOrdersByMember(memberId);
+
+	    // 4) PageResponseDTO 구성
+	    PageResponseDTO<OrdersListItemDTO> res = new PageResponseDTO<>();
+	    res.setList(rows);
+	    res.setTotalCount(totalCount);
+	    res.setPage(req.getPage());
+	    res.setSize(req.getSize());
+
+	    return res;
 	}
 
 
@@ -245,15 +268,16 @@ public class OrdersServiceImpl implements OrdersService {
 				.imageSort(img.getImageSort()) // 정렬 순서
 				.imageType(img.getImageType() != null ? img.getImageType().name() : null)
 				.build(); // dto생성
-
-		// DTO 타입별로 알맞게 set
-		if (targetDto instanceof ticketnow.modules.order.dto.pay.PayPageDTO) { // pay 페이지 dto라면
-			((ticketnow.modules.order.dto.pay.PayPageDTO) targetDto).setTicketThumbnail(imageDTO); // 썸네일 주입
-		} else if (targetDto instanceof ticketnow.modules.order.dto.OrdersDetailDTO) { // 상세 dto라면
-			((ticketnow.modules.order.dto.OrdersDetailDTO) targetDto).setTicketThumbnail(imageDTO); // 썸네일 주입
-		} else if (targetDto instanceof ticketnow.modules.order.dto.receive.ReceiveOptionPageDTO) { // 수령방법 선택 dto라면
-			((ticketnow.modules.order.dto.receive.ReceiveOptionPageDTO) targetDto).setTicketThumbnail(imageDTO); // 썸네일 주입
-		}
+		 // DTO 타입별로 알맞게 set
+	    if (targetDto instanceof ticketnow.modules.order.dto.pay.PayPageDTO) {
+	        ((ticketnow.modules.order.dto.pay.PayPageDTO) targetDto).setTicketThumbnail(imageDTO);
+	    } else if (targetDto instanceof ticketnow.modules.order.dto.OrdersDetailDTO) {
+	        ((ticketnow.modules.order.dto.OrdersDetailDTO) targetDto).setTicketThumbnail(imageDTO);
+	    } else if (targetDto instanceof ticketnow.modules.order.dto.receive.ReceiveOptionPageDTO) {
+	        ((ticketnow.modules.order.dto.receive.ReceiveOptionPageDTO) targetDto).setTicketThumbnail(imageDTO);
+	    } else if (targetDto instanceof ticketnow.modules.order.dto.OrdersListItemDTO) {
+	        ((ticketnow.modules.order.dto.OrdersListItemDTO) targetDto).setTicketThumbnail(imageDTO);
+	    }
 	}
 
 

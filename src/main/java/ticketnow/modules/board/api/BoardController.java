@@ -182,4 +182,16 @@ public class BoardController {
         boardService.deleteReply(boardId, replyId);
         return ResponseEntity.ok().build();
     }
+    
+    // 조회용
+    @GetMapping("/admin/boards/member/{memberId}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<PageResponseDTO<InquiryListItemDTO>> getMemberInquiriesForAdmin(
+            @PathVariable String memberId,
+            @ModelAttribute PageRequestDTO pageReq
+    ) {
+        // 기존 '내 문의 목록' 로직 재사용
+        PageResponseDTO<InquiryListItemDTO> res = boardService.getMyInquiries(memberId, pageReq);
+        return ResponseEntity.ok(res);
+    }
 }

@@ -1535,3 +1535,83 @@ map {
 	background-color: #999999;
 	cursor: not-allowed;
 }
+
+/* 오픈예정 티켓 섹션 제목 */
+.upcoming-title-box {
+  text-align: center;       /* 가운데 정렬 */
+  margin: 35px 0 80px;      /* 위/아래 여백 */
+}
+
+.upcoming-title-text {
+  color: #FFA6C9;           /* 분홍색 */
+  font-size: 48px;          /* 글씨 크기 */
+  font-weight: bold;
+}
+
+/* 정렬 옵션 영역 */
+.ticket-sort {
+  text-align: right;        /* 오른쪽 정렬 */
+  margin: 20px 40px 20px 0; /* 오른쪽 약간 안쪽으로 */
+}
+
+/* 정렬 옵션 select 박스 크기/폰트 */
+.ticket-sort-select {
+  min-width: 180px;         /* 가로 넓이 */
+  height: 42px;             /* 세로 높이 */
+  padding: 8px 8px;        /* 안쪽 여백 */
+  font-size: 16px;          /* 글씨 크기 */
+  border-radius: 8px;      /* 둥근 모서리 */
+  border: 1px solid #D9D9D9;
+  color: #808080;
+  outline: none;
+  text-align: center;
+}
+.my-divider-1{
+margin-top: 80px;
+margin-bottom: 50px;
+border: 0.5px solid #f5f5f5;
+}
+/* ===== 티켓 리스트 페이징 공통 영역 ===== */
+.ticket-pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+  margin: 80px 0 30px 0;
+}
+
+.ticket-page-button {
+  min-width: 90px;
+  padding: 8px 16px;
+  border-radius: 20px;
+  border: 1px solid #D7D7D7;
+  background: #fff;
+  color: #808080;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+
+}
+
+.ticket-page-button:disabled {
+  cursor: default;
+  opacity: 0.5;
+}
+
+.ticket-page-info {
+  font-size: 15px;
+  color: #808080;
+  font-weight: bold;
+}
+/* ====== FloorF1~F4: '이전 단계' + '좌석 다시 선택' 버튼을 가로 1줄 + 동일 너비 ====== */
+.ticket-seage-page .ticket-stage-button2.ticket-stage-button2-row {
+  flex-direction: row !important;
+  justify-content: center;
+  width: 450px;        /* '좌석 선택 완료' 버튼과 동일 폭(현재 450px) */
+  margin: 0 auto;
+}
+
+/* 두 버튼 동일 폭 보장 */
+.ticket-seage-page .ticket-stage-button2.ticket-stage-button2-row .ticket-stage-back {
+  flex: 1;
+}

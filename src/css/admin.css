@@ -9,7 +9,12 @@
 }
 
 .admin-Member-memImg {
-	width: 100px;
+	width: 115px;
+	height: 115px;          
+	border-radius: 80px;
+	border: #d6d4d4 solid 5px;
+	object-fit: cover;      
+	display: block;        
 }
 
 .admin-Member-conBox {
@@ -48,6 +53,7 @@
 	top: 30px;
 	left: 200px;
 	position: absolute;
+	margin-top: 15px;
 }
 
 .admin-Member-BoxTb th {
@@ -180,8 +186,7 @@
 }
 
 .admin-admin-pickBox {
-	border: 1px solid #D9D9D9;
-	border-radius: 10px;
+
 	padding: 50px;
 	height: 280px;
 	width: 800px;
@@ -606,7 +611,7 @@
   width: 100%;
   border-collapse: collapse;
   table-layout: fixed;
-  font-size: 13px;
+  font-size: 16px;
 }
 
 .admin-orders-table thead th {
@@ -643,7 +648,7 @@
   border-bottom: 1px solid #f3f3f3;
   color: #555;
   text-align: center;
-  font-size: 12px;
+  font-size: 15px;
 }
 
 /* 공연명은 왼쪽 정렬 + 말줄임표 */
@@ -690,8 +695,16 @@
   padding: 4px 6px;
   border-radius: 6px;
   border: 1px solid #dddddd;
-  font-size: 11px;
+  font-size: 12px;
   background-color: #ffffff;
+}
+/* AdminMember1 - 주문상태 셀렉트 박스 크기/폰트 조절 */
+.admin-member-orders-table .admin-orders-status-select {
+  min-width: 130px;   /* 가로 길이 */
+  height: 38px;       /* 세로 높이 */
+  padding: 4px 10px;  /* 안쪽 여백 */
+  font-size: 16px;    /* 글자 크기 */
+  margin-right: 10px;
 }
 
 /* (3) 주문상태 변경 버튼 – AdminOrders 에서는 작은 버전으로 */
@@ -832,4 +845,273 @@
   text-align: center;
   justify-content: center;
   font-weight: 500;
+}
+/* AdminMember1.jsx - 회원 프로필 이미지 크기 조절 */
+.admin-member-heart {
+    width: 120px;          /* 원하는 최종 크기 (100~150px 권장) */
+    height: 120px;
+    border-radius: 50%;    /* 동그랗게 */
+    object-fit: cover;     /* 찌그러지지 않도록 중앙 기준 crop */
+    border: 3px solid #D9D9D9; /* 선택: 테두리 */
+    display: inline-block;
+}
+/* ===========================
+   AdminMember1 - 회원정보 카드
+   =========================== */
+
+/* 회원정보 카드 전체 */
+.admin-member-profile-card {
+  width: 800px;              /* 다른 카드들과 가로 폭 통일 */
+  padding: 20px 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+/* 제목 영역: 상단 왼쪽 정렬 */
+.admin-member-titleBox {
+  width: 100%;
+  margin-bottom: 16px;
+  text-align: left;
+}
+
+.admin-member-title {
+  margin: 0;
+  font-size: 24px;
+  font-weight: bold;
+  text-align: left;
+}
+
+/* 프로필(왼쪽) + 정보(오른쪽) 가로 배치 */
+.admin-member-profile-body {
+  display: flex;
+  align-items: center;
+  gap: 30px;           /* 사진과 정보 사이 간격 */
+}
+
+.admin-member-profile-left {
+  flex-shrink: 0;
+}
+
+.admin-member-profile-right {
+  flex: 1;
+}
+
+/* 회원정보 테이블 간격/정렬 */
+.admin-member-memBox-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0 6px;
+  font-size: 17px;
+}
+.admin-top-box {
+	margin-bottom: 20px;
+}
+
+.admin-member-memBox-table th {
+  text-align: left;
+  padding-right: 16px;
+  white-space: nowrap;
+}
+
+.admin-member-memBox-table td {
+  text-align: left;
+}
+
+/* 회원 권한 셀 내 select + 버튼 간격 */
+.admin-member-role-select {
+  min-width: 120px;
+  margin-right: 8px;
+}
+.admin-member-role-btn {
+  padding: 4px 10px;
+  font-size: 13px;
+  border-radius: 8px;
+  border: 1px solid #f3c3da;
+  background: #ffa6c9;
+  color: #fff;
+  cursor: pointer;
+}
+
+/* ===========================
+   AdminMember1 - 주문내역 카드
+   =========================== */
+
+/* 카드 안 전체 가운데 정렬 */
+.admin-member-memBox3 {
+  align-items: center;
+  text-align: center;
+}
+
+/* 제목도 가운데 */
+.admin-member-memBox3 .member-myTk-title2 {
+  width: 100%;
+  text-align: center;
+}
+
+/* 주문내역 테이블 가운데 정렬 */
+.admin-member-orders-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 30px;
+  margin-left: 100px;
+  margin-bottom: 30px;
+  
+}
+
+.admin-member-orders-table th,
+.admin-member-orders-table td {
+  padding: 8px 10px;
+  text-align: center;
+  font-size: 20px;
+}
+
+/* ===========================
+   AdminMember1 - 문의내역 카드
+   =========================== */
+
+.admin-member-inquiry-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+
+.admin-member-inquiry-table th,
+.admin-member-inquiry-table td {
+  padding: 8px 12px;     /* 열 간 간격 확보 */
+  font-size: 14px;
+}
+
+/* 헤더는 가운데 정렬 */
+.admin-member-inquiry-table th {
+  text-align: center;
+}
+
+
+/* 번호 열 */
+.admin-member-inquiry-table td:nth-child(1) {
+  width: 10%;
+  text-align: center;
+}
+
+/* 제목 열 */
+.admin-member-inquiry-table td:nth-child(2) {
+  width: 60%;
+  text-align: center;
+}
+
+/* 작성일 열 */
+.admin-member-inquiry-table td:nth-child(3) {
+  width: 30%;
+  text-align: center;
+}
+/* ============================
+   Admin 메인(Admin.jsx) 전용 레이아웃 조정
+   ============================ */
+.member-Member-page.admin-Admin-page {
+  max-width: 1200px;   /* 전체 폭 넓게 */
+  width: 100%;
+}
+
+/* Admin 페이지에서 오른쪽 본문 영역 폭/정렬 재조정 */
+.member-Member-page.admin-Admin-page .member-right {
+  margin-left: 320px;                 /* 사이드바 기준 여백 */
+  width: calc(100% - 260px);          /* 남는 영역 전부 사용 */
+  max-width: 900px;                   /* 카드(860px)보다 살짝 넓게 */
+}
+/* ===========================
+   Admin 메인 - 회원 현황 카드
+   =========================== */
+.admin-member-stats-card {
+  width: 800px;              /* 다른 카드들과 가로 폭 통일 */
+  display: flex;
+  align-items: center;
+  gap: 30px;
+}
+
+.admin-member-stats-left img {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  object-fit: cover;
+  text-align: center;
+  margin-left: 120px;
+}
+
+.admin-member-stats-right p {
+  margin: 4px 0;
+  font-size: 18px;
+  line-height: 1.5;
+  color: #808080;
+  text-align: center;
+}
+
+.admin-member-stats-right strong {
+  color: #FFA6C9;
+  font-size: 22px;
+}
+/* AdminInven3 판매 상태 select + 버튼 */
+.admin-inven3-status-select {
+  padding: 4px 8px;
+  margin-right: 8px;
+  font-size: 13px;
+}
+
+.admin-inven3-status-btn {
+  padding: 4px 10px;
+  font-size: 13px;
+  border: 1px solid #ddd;
+  background-color: #f5f5f5;
+  cursor: pointer;
+}
+
+.admin-inven3-status-btn:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.admin-inven3-status-current {
+  margin-left: 8px;
+  font-size: 12px;
+  color: #555;
+}
+
+.admin-inven3-status-error {
+  margin-top: 4px;
+  font-size: 12px;
+  color: #d9534f;
+}
+/* =========================
+   AdminMember 페이징 버튼
+   ========================= */
+.admin-pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  margin: 50px 400px 30px ;
+}
+
+.admin-page-button {
+  border: none;
+  background: #FFA6C9;
+  color: #fff;
+  font-weight: bold;
+  font-size: 14px;
+  padding: 6px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.admin-page-button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.admin-page-info {
+  font-size: 14px;
+  font-weight: bold;
+  color: #808080;
+  min-width: 80px;
+  text-align: center;
 }

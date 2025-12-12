@@ -296,9 +296,9 @@ export default function Read() {
 										<button className="read-button2">공연정보</button>
 									</Link>
 									<button className="read-button1">판매정보</button>
-									<Link to={`/Ticket/Review/${ticket.ticketId}`}>
+									
 										<button className="read-button1">공연후기</button>
-									</Link>
+							
 									<button className="read-button1">기대평</button>
 									<button className="read-button1">QNA</button>
 								</div>

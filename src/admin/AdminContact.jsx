@@ -164,6 +164,24 @@ export default function AdminContactDetail() {
     (board.attachments && board.attachments.length > 0) ||
     (board.image && board.image.length > 0);
 
+// 문의유형 표시용 라벨 매핑
+const CATEGORY_TYPE_LABEL = {
+  SHOW_INFO: "공연",
+  TICKET_BOOKING: "예매",
+  PAYMENT: "결제",
+  ACCOUNT: "계정",
+  TECHNICAL: "시스템문의",
+  OTHER: "기타",
+};
+
+const getCategoryTypeLabel = (v) => {
+  if (!v) return "";
+  return CATEGORY_TYPE_LABEL[v] || v; // 혹시 모르는 값은 원문 그대로
+};
+
+
+
+
   return (
     // ✅ 기존 레이아웃 구조 그대로 복원
     <div className="member-Member-page">
@@ -185,11 +203,11 @@ export default function AdminContactDetail() {
                     <tr>
                       <td>
                         <input
-                          type="text"
-                          className="admin-cont-phone1"
-                          value={board.email || ""}
-                          readOnly
-                        />
+  type="text"
+  className="admin-cont-phone1"
+  value={getCategoryTypeLabel(board.categoryType)}
+  readOnly
+/>
                       </td>
                       <td>
                         <input
@@ -305,8 +323,7 @@ export default function AdminContactDetail() {
                           {/* 댓글 내용 */}
                           <tr>
                             <td colSpan={2}>
-                              {reply.replyContent || reply.content} (
-                              {reply.adminId || reply.memberId || "관리자"})
+                              {reply.replyContent || reply.content} 
                             </td>
                           </tr>
 

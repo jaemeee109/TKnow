@@ -7,6 +7,12 @@ import AdminSidebar from "./AdminSidebar";
 import api from "../api";
 
 const ORDER_STATUS_OPTIONS = ["CREATED", "PAID", "CANCELED", "REFUNDED"];
+const ORDER_STATUS_LABELS = {
+  CREATED: "주문중",
+  PAID: "결제완료",
+  CANCELED: "주문취소",
+  REFUNDED: "환불완료",
+};
 
 export default function AdminOrders() {
   const [orders, setOrders] = useState([]);
@@ -160,11 +166,12 @@ export default function AdminOrders() {
                             }
                           >
                             <option value="">상태 선택</option>
-                            {ORDER_STATUS_OPTIONS.map((st) => (
-                              <option key={st} value={st}>
-                                {st}
-                              </option>
-                            ))}
+                           {ORDER_STATUS_OPTIONS.map((st) => (
+  <option key={st} value={st}>
+    {ORDER_STATUS_LABELS[st] || st}
+  </option>
+))}
+
                           </select>
                           <button
                             type="button"
@@ -186,29 +193,30 @@ export default function AdminOrders() {
               </table>
             )}
 
-            {!loading && totalPages > 1 && (
-              <div className="admin-orders-pagination">
-                <button
-                  type="button"
-                  className="admin-con-btn admin-inven3-back-btn"
-                  disabled={page <= 1}
-                  onClick={() => fetchOrders(page - 1)}
-                >
-                  이전
-                </button>
-                <span className="admin-orders-page-info">
-                  {page} / {totalPages}
-                </span>
-                <button
-                  type="button"
-                  className="admin-con-btn admin-inven3-back-btn"
-                  disabled={page >= totalPages}
-                  onClick={() => fetchOrders(page + 1)}
-                >
-                  다음
-                </button>
-              </div>
-            )}
+           {!loading && !error && totalCount > 0 && (
+  <div className="admin-orders-pagination">
+    <button
+      type="button"
+      className="admin-con-btn admin-inven3-back-btn"
+      disabled={page <= 1}
+      onClick={() => fetchOrders(page - 1)}
+    >
+      이전
+    </button>
+    <span className="admin-orders-page-info">
+      {page} / {totalPages}
+    </span>
+    <button
+      type="button"
+      className="admin-con-btn admin-inven3-back-btn"
+      disabled={page >= totalPages}
+      onClick={() => fetchOrders(page + 1)}
+    >
+      다음
+    </button>
+  </div>
+)}
+
           </div>
         </div>
       </div>

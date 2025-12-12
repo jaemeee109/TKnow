@@ -29,31 +29,61 @@ const resolveImageUrl = (path) => {
   return `${BASE_URL}/${path}`;
 };
 
-
 const date = new Date();
 
 export default function Member() {
   const [members, setMembers] = useState([]);
- const [loading, setLoading] = useState(false);
-  useEffect(() => {
-    const token = localStorage.getItem("accessToken");
+  const [loading, setLoading] = useState(false);
 
-    api
-      .get("members?page=1&size=6", {
+  // ✅ 페이징 상태 추가
+  const [page, setPage] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
+  const [size] = useState(20);
+
+  const fetchMembers = async (pageParam = 1) => {
+    try {
+      setLoading(true);
+
+      const token = localStorage.getItem("accessToken");
+
+      const res = await api.get("members", {
         headers: token ? { Authorization: `Bearer ${token}` } : {},
-      })
-      .then((res) => {
-        const list = Array.isArray(res.data.list) ? res.data.list : [];
-        setMembers(list);
-      })
-      .catch((error) => {
-        console.error("회원 목록 조회 실패:", error.response?.data || error);
+        params: { page: pageParam, size },
       });
+
+      const data = res.data || {};
+      const list = Array.isArray(data.list) ? data.list : [];
+
+      setMembers(list);
+      setTotalCount(data.totalCount || 0);
+      setPage(data.page || pageParam);
+    } catch (error) {
+      console.error("회원 목록 조회 실패:", error.response?.data || error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchMembers(1);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const totalPages = Math.max(1, Math.ceil(totalCount / size));
 
+  const handlePrevPage = () => {
+    if (page <= 1) return;
+    const nextPage = page - 1;
+    setPage(nextPage);
+    fetchMembers(nextPage);
+  };
 
-
+  const handleNextPage = () => {
+    if (page >= totalPages) return;
+    const nextPage = page + 1;
+    setPage(nextPage);
+    fetchMembers(nextPage);
+  };
 
   return (
     <div className="member-Member-page">
@@ -61,23 +91,24 @@ export default function Member() {
 
       <div className="member-right">
         <div className="member-Member-box2">
-          {members.length === 0 && <p>회원 정보가 없습니다.</p>}
+          {loading && <p>회원 목록을 불러오는 중입니다.</p>}
+          {!loading && members.length === 0 && <p>회원 정보가 없습니다.</p>}
 
-          {members
-            .filter((member) => member.memberRole !== "ADMIN") // ADMIN 제외
-            .map((member, index) => {
-              
-              const profileSrc = resolveImageUrl(member.profileImageUrl);
+          {!loading &&
+            members
+              .filter((member) => member.memberRole !== "ADMIN") // ADMIN 제외
+              .map((member, index) => {
+                const profileSrc = resolveImageUrl(member.profileImageUrl);
 
-              return (
-                <Link
-                  key={member.member_id || index} //  key 반드시 필요 
-                  to={`/admin/AdminMember1/${member.memberId}`}
-                  className={
-                    index === 0 ? "admin-Member-conBox" : "admin-Member-conBoxnoe"
-                  }
-                >
-                  <img
+                return (
+                  <Link
+                    key={member.member_id || index} //  key 반드시 필요
+                    to={`/admin/AdminMember1/${member.memberId}`}
+                    className={
+                      index === 0 ? "admin-Member-conBox" : "admin-Member-conBoxnoe"
+                    }
+                  >
+                    <img
                       src={profileSrc}
                       alt="멤버_상세"
                       className="admin-Member-memImg"
@@ -86,34 +117,54 @@ export default function Member() {
                         e.target.src = Pro; // 관리자 목록에서도 기본 프로필로 대체
                       }}
                     />
-                  <div className="admin-Member-Box1">
-                    <span>신규</span>
-                    <div className="admin-Member-BoxTb">
-                      <table>
-                        <tbody>
-                          <tr>
-                            <td>{member.memberName}</td>
-                            <td>｜</td>
-                            <td>{member.memberId}</td>
-                          </tr>
-                          <tr>
-                            <td>{member.memberEmail}</td>
-                            <td>｜</td>
-                            <td>{member.memberPhone}</td>
-                          </tr>
-                        </tbody>
-                      </table>
+                    <div className="admin-Member-Box1">
+                      <div className="admin-Member-BoxTb">
+                        <table>
+                          <tbody>
+                            <tr>
+                              <td>{member.memberName}</td>
+                              <td>｜</td>
+                              <td>{member.memberId}</td>
+                            </tr>
+                            <tr>
+                              <td>{member.memberEmail}</td>
+                              <td>｜</td>
+                              <td>{member.memberPhone}</td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
                     </div>
-                  </div>
-                </Link>
-              );
-            })}
+                  </Link>
+                );
+              })}
 
 
-          <div className="admin-member-plus">
-            <strong> + </strong> <span> 회원 목록 더 보기 </span>
+          <div className="admin-pagination">
+            <button
+              type="button"
+              className="admin-page-button"
+              onClick={handlePrevPage}
+              disabled={page === 1}
+            >
+              ◀
+            </button>
+
+            <span className="admin-page-info">
+              {page} / {totalPages}
+            </span>
+
+            <button
+              type="button"
+              className="admin-page-button"
+              onClick={handleNextPage}
+              disabled={page === totalPages}
+            >
+              ▶
+            </button>
           </div>
-          <br />
+
+         
         </div>
       </div>
     </div>

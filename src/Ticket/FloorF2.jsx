@@ -201,7 +201,7 @@ export default function F2Floor() {
             </div>
             <br />
 
-            <div className="ticket-stage-button2">
+                        <div className="ticket-stage-button2 ticket-stage-button2-row">
               <Link
                 to={`/Ticket/Buy2/${id}`}
                 state={{ selectedDate, selectedRoundNo: roundNo, ticketInfo }}
@@ -216,6 +216,7 @@ export default function F2Floor() {
                 좌석 다시 선택
               </button>
             </div>
+
 
           </div>
         </div>

@@ -109,6 +109,42 @@ export default function MyTick() {
 		// 기타 타입은 문자열로
 		return String(date);
 	};
+	// showStartTime을 어떤 형태로 받아도 "HH:mm"으로 정규화
+	const formatHHmm = (value) => {
+		if (value == null) return "";
+
+		// 백엔드가 LocalTime을 배열([hour, minute, ...])로 주는 경우
+		if (Array.isArray(value) && value.length >= 2) {
+			const [h, m] = value;
+			const hh = String(h ?? 0).padStart(2, "0");
+			const mm = String(m ?? 0).padStart(2, "0");
+			return `${hh}:${mm}`;
+		}
+
+		// 문자열/숫자 등 기타 타입 (예: "140", "14:00", 140 등)
+		const digits = String(value).replace(/\D/g, "");
+		if (!digits) return "";
+
+		let hh = "00";
+		let mm = "00";
+
+		if (digits.length >= 4) {
+			hh = digits.slice(0, 2);
+			mm = digits.slice(2, 4);
+		} else if (digits.length === 3) {
+			hh = digits.slice(0, 2);
+			mm = digits.slice(2).padStart(2, "0");
+		} else if (digits.length === 2) {
+			hh = digits;
+			mm = "00";
+		} else if (digits.length === 1) {
+			hh = `0${digits}`;
+			mm = "00";
+		}
+
+		return `${hh.padStart(2, "0")}:${mm.padStart(2, "0")}`;
+	};
+
 
 	const handleLogout = () => {
 		localStorage.removeItem("accessToken");
@@ -161,17 +197,18 @@ export default function MyTick() {
 													<tr>
 														<th>{order.ticketTitle}</th>
 													</tr>
-													{/* (3) 공연 장소 (venueName 사용) */}
-													<tr>
-														<th>{order.ticketVenue || "장소 미정"}</th>
-													</tr>
-													{/* (4) "년.월.일 시:분" */}
-													<tr>
-														<td>
-															{formatDate(order.ticketDate)}{" "}
-															{order.showStartTime || ""}
-														</td>
-													</tr>
+												{/* (3) 공연 장소 (ticketVenue 우선, 없으면 venueName fallback) */}
+<tr>
+  <th>{order.ticketVenue || order.venueName || "장소 미정"}</th>
+</tr>
+
+{/* (4) "년.월.일 시:분" */}
+<tr>
+  <td>
+    {formatDate(order.ticketDate)} {formatHHmm(order.showStartTime)}
+  </td>
+</tr>
+
 												</tbody>
 											</table>
 										</div>

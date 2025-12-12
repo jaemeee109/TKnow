@@ -5,8 +5,9 @@ import "../css/style.css";
 import { Link, useLocation } from "react-router-dom";
 
 export default function AdminSidebar({ adminName }) {
+  
   const location = useLocation();
-
+  
   const isActive = (pathPrefix) => location.pathname.startsWith(pathPrefix);
 
   // 메인화면 active

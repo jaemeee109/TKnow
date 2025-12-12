@@ -8,6 +8,7 @@ import AdminSidebar from "./AdminSidebar";
 
 const BASE_URL = (api.defaults.baseURL || "").replace(/\/$/, "");
 
+// 티켓 판매 상태 라벨
 const statusLabel = {
   ON_SALE: "판매중",
   SOLD_OUT: "매진",
@@ -49,32 +50,81 @@ export default function AdminInven3() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+  // 🔹 판매 상태(=ticketStatus) 수정용 상태 (반드시 컴포넌트 안에서 선언해야 함)
+  const [editStatus, setEditStatus] = useState("");
+  const [statusUpdating, setStatusUpdating] = useState(false);
+  const [statusError, setStatusError] = useState("");
+
   // 티켓 기본 정보 + 회차별 좌석 통계 불러오기
   useEffect(() => {
-    const fetchData = async () => {
+    async function fetchData() {
       try {
         setLoading(true);
-        const token = localStorage.getItem("accessToken");
-        const headers = token ? { Authorization: `Bearer ${token}` } : {};
-
-        const [ticketRes, seatRes] = await Promise.all([
-          api.get(`/tickets/${ticketId}`, { headers }),
-          api.get(`/tickets/${ticketId}/seats/stats`, { headers }),
-        ]);
-
-        setTicket(ticketRes.data);
-        setSeatStats(Array.isArray(seatRes.data) ? seatRes.data : []);
         setError("");
+
+        // 티켓 상세
+        const ticketRes = await api.get(`/tickets/${ticketId}`);
+        setTicket(ticketRes.data);
+
+        // 현재 판매 상태를 select 초기값으로 세팅
+        if (ticketRes.data && ticketRes.data.ticketStatus) {
+          setEditStatus(ticketRes.data.ticketStatus);
+        }
+
+        // 회차별 좌석 현황
+        const seatStatsRes = await api.get(`/tickets/${ticketId}/seats/stats`);
+        setSeatStats(seatStatsRes.data || []);
       } catch (err) {
         console.error("재고 조회 데이터 불러오기 실패:", err);
-        setError(err.response?.data?.message || err.message);
+        setError("재고 조회 데이터 불러오기 실패");
       } finally {
         setLoading(false);
       }
-    };
+    }
 
     fetchData();
   }, [ticketId]);
+
+  // 판매 상태 변경 처리 (관리자용)
+  const handleChangeTicketStatus = async () => {
+    if (!ticket || !ticket.ticketId) {
+      alert("티켓 정보가 없습니다.");
+      return;
+    }
+
+    if (!editStatus) {
+      alert("변경할 판매 상태를 선택해 주세요.");
+      return;
+    }
+
+    const confirmMsg = `판매 상태를 "${statusLabel[editStatus] || editStatus}"(으)로 변경하시겠습니까?`;
+    if (!window.confirm(confirmMsg)) {
+      return;
+    }
+
+    try {
+      setStatusUpdating(true);
+      setStatusError("");
+
+      // /tickets/admin/{ticketId}/status 로 PATCH
+      const res = await api.patch(`/tickets/admin/${ticket.ticketId}/status`, {
+        ticketStatus: editStatus,
+      });
+
+      // 응답으로 변경된 티켓 정보를 다시 세팅
+      if (res && res.data) {
+        setTicket(res.data);
+      }
+
+      alert("판매 상태가 변경되었습니다.");
+    } catch (err) {
+      console.error("판매 상태 변경 실패:", err);
+      setStatusError("판매 상태 변경 중 오류가 발생했습니다.");
+      alert("판매 상태 변경 중 오류가 발생했습니다.");
+    } finally {
+      setStatusUpdating(false);
+    }
+  };
 
   const handleBack = () => {
     navigate("/admin/AdminInven");
@@ -149,7 +199,40 @@ export default function AdminInven3() {
                 <tr>
                   <th>판매 상태</th>
                   <td>
-                    {statusLabel[ticket.ticketStatus] || ticket.ticketStatus}
+                    <select
+                      className="admin-inven3-status-select"
+                      value={editStatus || ""}
+                      onChange={(e) => setEditStatus(e.target.value)}
+                      disabled={statusUpdating}
+                    >
+                      <option value="">상태 선택</option>
+                      <option value="SCHEDULED">
+                        {statusLabel.SCHEDULED}
+                      </option>
+                      <option value="ON_SALE">
+                        {statusLabel.ON_SALE}
+                      </option>
+                      <option value="SOLD_OUT">
+                        {statusLabel.SOLD_OUT}
+                      </option>
+                      <option value="CLOSED">
+                        {statusLabel.CLOSED}
+                      </option>
+                    </select>
+                    <button
+                      type="button"
+                      className="admin-inven3-status-btn"
+                      onClick={handleChangeTicketStatus}
+                      disabled={statusUpdating}
+                    >
+                      {statusUpdating ? "변경 중..." : "변경"}
+                    </button>
+                  
+                    {statusError && (
+                      <div className="admin-inven3-status-error">
+                        {statusError}
+                      </div>
+                    )}
                   </td>
                 </tr>
                 <tr>
@@ -222,55 +305,55 @@ export default function AdminInven3() {
 
             {/* 회차별 좌석 수 / 잔여 좌석 수 */}
             <h3 style={{ margin: "20px 0 10px" }}>회차별 좌석 현황</h3>
-<div className="admin-seat-stats-box">
-  <table className="admin-member-text1 admin-seat-stats-table">
-    <thead>
-      <tr>
-        <th>회차</th>
-        <th>총 좌석 수</th>
-        <th>잔여 좌석 수</th>
-      </tr>
-    </thead>
-    <tbody>
-      {seatStats.length > 0 ? (
-        <>
-          {seatStats.map((s) => (
-            <tr key={s.roundNo}>
-              <td>{s.roundNo}</td>
-              <td>{s.totalSeats}</td>
-              <td>{s.remainingSeats}</td>
-            </tr>
-          ))}
-          <tr>
-            <td>
-              <strong>전체</strong>
-            </td>
-            <td>
-              <strong>{totalSeatsAll}</strong>
-            </td>
-            <td>
-              <strong>{remainingSeatsAll}</strong>
-            </td>
-          </tr>
-        </>
-      ) : (
-        <tr>
-          <td colSpan={3}>회차별 좌석 정보가 없습니다.</td>
-        </tr>
-      )}
-    </tbody>
-  </table>
-</div>
-<div >
-  <button
-    type="button"
-    className="admin-con-btn admin-inven3-back-btn"
-    onClick={handleBack}
-  >
-    목록으로
-  </button>
-</div>
+            <div className="admin-seat-stats-box">
+              <table className="admin-member-text1 admin-seat-stats-table">
+                <thead>
+                  <tr>
+                    <th>회차</th>
+                    <th>총 좌석 수</th>
+                    <th>잔여 좌석 수</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {seatStats.length > 0 ? (
+                    <>
+                      {seatStats.map((s) => (
+                        <tr key={s.roundNo}>
+                          <td>{s.roundNo}</td>
+                          <td>{s.totalSeats}</td>
+                          <td>{s.remainingSeats}</td>
+                        </tr>
+                      ))}
+                      <tr>
+                        <td>
+                          <strong>전체</strong>
+                        </td>
+                        <td>
+                          <strong>{totalSeatsAll}</strong>
+                        </td>
+                        <td>
+                          <strong>{remainingSeatsAll}</strong>
+                        </td>
+                      </tr>
+                    </>
+                  ) : (
+                    <tr>
+                      <td colSpan={3}>회차별 좌석 정보가 없습니다.</td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
 
+            <div>
+              <button
+                type="button"
+                className="admin-con-btn admin-inven3-back-btn"
+                onClick={handleBack}
+              >
+                목록으로
+              </button>
+            </div>
           </div>
         </div>
       </div>

@@ -1880,6 +1880,7 @@ map {
     flex-direction: column; /* 세로 방향 정렬 */
     gap: 20px;             /* 섹션 간 간격 */
     align-items: center;   /* 자식 카드들을 가로 기준 가운데 정렬 */
+	 margin-bottom: 30px;
 }
 
 
@@ -2131,7 +2132,8 @@ map {
 	padding: 15px;
 	border-radius: 10px;
 	width: 500px;
-	line-height: 10px;
+	line-height: 1.6;
+	font-size: 15px;
 	border: 1px solid #D9D9D9;
 	margin-bottom: 20px;
 }
@@ -2395,14 +2397,16 @@ map {
 	border: 1px solid #D9D9D9;
 }
 
-.Ad-conts-rep {
-	padding: 15px;
-	border-radius: 10px;
-	width: 500px !important;
-	line-height: 10px;
-	border: 1px solid #D9D9D9;
-	height: 200px;
+.Ad-conts-rep{
+  height: 100px;
+  width: 700px;
+  min-width: 700px;
+  border-radius: 10px;
+  border:1px solid #D9D9D9;
+  line-height: 1.5;
+  font-size: 15px;
 }
+
 
 .inven-main-box {
 	border: 1px solid #D9D9D9;

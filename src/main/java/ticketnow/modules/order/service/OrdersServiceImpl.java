@@ -269,14 +269,14 @@ public class OrdersServiceImpl implements OrdersService {
 				.imageType(img.getImageType() != null ? img.getImageType().name() : null)
 				.build(); // dto생성
 		 // DTO 타입별로 알맞게 set
-	    if (targetDto instanceof ticketnow.modules.order.dto.pay.PayPageDTO) {
-	        ((ticketnow.modules.order.dto.pay.PayPageDTO) targetDto).setTicketThumbnail(imageDTO);
-	    } else if (targetDto instanceof ticketnow.modules.order.dto.OrdersDetailDTO) {
-	        ((ticketnow.modules.order.dto.OrdersDetailDTO) targetDto).setTicketThumbnail(imageDTO);
+	    if (targetDto instanceof PayPageDTO) {
+	        ((PayPageDTO) targetDto).setTicketThumbnail(imageDTO);
+	    } else if (targetDto instanceof OrdersDetailDTO) {
+	        ((OrdersDetailDTO) targetDto).setTicketThumbnail(imageDTO);
 	    } else if (targetDto instanceof ticketnow.modules.order.dto.receive.ReceiveOptionPageDTO) {
-	        ((ticketnow.modules.order.dto.receive.ReceiveOptionPageDTO) targetDto).setTicketThumbnail(imageDTO);
+	        ((ReceiveOptionPageDTO) targetDto).setTicketThumbnail(imageDTO);
 	    } else if (targetDto instanceof ticketnow.modules.order.dto.OrdersListItemDTO) {
-	        ((ticketnow.modules.order.dto.OrdersListItemDTO) targetDto).setTicketThumbnail(imageDTO);
+	        ((OrdersListItemDTO) targetDto).setTicketThumbnail(imageDTO);
 	    }
 	}
 
@@ -348,7 +348,6 @@ public class OrdersServiceImpl implements OrdersService {
         return res;
     }
 
-    // 주문 상태 변경 ======
     @Override
     @Transactional
     public void updateOrdersStatus(Long ordersId, String ordersStatus) {
@@ -357,6 +356,15 @@ public class OrdersServiceImpl implements OrdersService {
         if (updated == 0) {
             throw new ResourceNotFoundException("주문을 찾을 수 없습니다: " + ordersId);
         }
+
+        // 주문이 취소(CANCELED) 또는 환불(REFUNDED)인 경우,
+        // 해당 주문에 연결된 좌석들을 다시 AVAILABLE 로 되돌린다.
+        if ("CANCELED".equalsIgnoreCase(ordersStatus) ||
+            "REFUNDED".equalsIgnoreCase(ordersStatus)) {
+            int seatUpdated = ordersMapper.resetSeatStatusByOrdersId(ordersId);
+            log.info("[Service] resetSeatStatusByOrdersId ordersId={} affectedRows={}", ordersId, seatUpdated);
+        }
     }
+
 
 }

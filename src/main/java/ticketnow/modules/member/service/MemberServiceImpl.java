@@ -1,6 +1,7 @@
 package ticketnow.modules.member.service;
 
 import java.time.LocalDateTime;
+import ticketnow.modules.member.dto.AdminMemberStatsDTO;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -285,4 +286,23 @@ public class MemberServiceImpl implements MemberService {
 		log.info("[MemberService][DELETE] soft delete rows={}, memberId={}", rows, memberId);
 		log.debug("[MemberService][DELETE] elapsed={} ms", (System.nanoTime() - t0) / 1_000_000.0);
 	}
+	
+    // 관리자용 회원 통계
+
+    @Override
+    @Transactional(readOnly = true)
+    public AdminMemberStatsDTO getAdminMemberStatsForLastMonth() {
+
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime from = now.minusMonths(1);
+
+        long newMembers = memberMapper.countNewMembersInPeriod(from, now);
+        long withdrawnMembers = memberMapper.countWithdrawnMembersInPeriod(from, now);
+
+        return AdminMemberStatsDTO.builder()
+                .newMembers(newMembers)
+                .withdrawnMembers(withdrawnMembers)
+                .build();
+    }
+
 }

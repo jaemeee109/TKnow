@@ -65,5 +65,10 @@ public interface OrdersMapper {
     // ======  주문 상태 변경 ======
     int updateOrdersStatus(@Param("ordersId") Long ordersId,
                            @Param("ordersStatus") String ordersStatus);
-    
+
+    // 주문 취소/환불 시: 해당 주문에 연결된 좌석들을 다시 AVAILABLE 로 되돌리기
+    int resetSeatStatusByOrdersId(@Param("ordersId") Long ordersId);
+
 }
+
+

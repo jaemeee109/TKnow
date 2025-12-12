@@ -35,6 +35,9 @@ import ticketnow.modules.common.service.image.FileService;
 import java.util.HashMap;
 import java.util.Map;
 
+
+import ticketnow.modules.member.dto.AdminMemberStatsDTO;
+
 /**
  * 회원(Member) 관련 CRUD API
  */
@@ -227,6 +230,15 @@ public class MemberController {
      return ResponseEntity.ok(body);
  }
 
-    
+ // 관리자용 회원 통계 
+
+ @GetMapping("/admin/dashboard-stats")
+ @PreAuthorize("hasRole('ADMIN')")
+ public ResponseEntity<AdminMemberStatsDTO> getAdminDashboardStatsForLastMonth() {
+
+     AdminMemberStatsDTO stats = memberService.getAdminMemberStatsForLastMonth();
+     return ResponseEntity.ok(stats);
+ }
+
 }
 

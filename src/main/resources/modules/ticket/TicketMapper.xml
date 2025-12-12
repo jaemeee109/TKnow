@@ -29,13 +29,25 @@
     )               AS remainingSeats,
 
     t.ticket_price   AS price,
+
+    <!-- 결제 완료(PAID) 기준 티켓별 총 매출 금액 -->
+    (
+        SELECT COALESCE(SUM(ot.order_price * ot.order_quantity), 0)
+        FROM orders o
+        JOIN order_ticket ot ON ot.orders_id = o.orders_id
+        JOIN seat s          ON s.seat_id = ot.seat_id
+        WHERE s.ticket_id     = t.ticket_id
+          AND o.orders_status = 'PAID'
+    )               AS totalPaidAmount,
+
     t.ticket_category AS ticketCategory,
-    t.ticket_status  AS ticketStatus,
-    t.ticket_detail  AS ticketDetail,
-    t.created_at     AS createdAt,
-    t.updated_at     AS updatedAt,
-    NULL             AS deletedAt
+    t.ticket_status   AS ticketStatus,
+    t.ticket_detail   AS ticketDetail,
+    t.created_at      AS createdAt,
+    t.updated_at      AS updatedAt,
+    NULL              AS deletedAt
 </sql>
+
 
 	<!-- INSERT: Map 파라미터 기반, PK 자동 채번 -->
 		<insert id="insertTicketFromMap" parameterType="map"

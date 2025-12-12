@@ -82,5 +82,25 @@
 		updated_at = NOW()
 		WHERE member_id = #{memberId}
 	</update>
+	
+	    <!-- ==================== 관리자 대시보드용 회원 통계 ==================== -->
 
+    <!-- 최근 한 달 신규 가입 회원 수 (ROLE = 'USER') -->
+    <select id="countNewMembersInPeriod" parameterType="map" resultType="long">
+        SELECT COUNT(*)
+        FROM member
+        WHERE member_role = 'USER'
+          AND deleted_at IS NULL
+          AND created_at BETWEEN #{from} AND #{to}
+    </select>
+
+    <!-- 최근 한 달 탈퇴 회원 수 (ROLE = 'WITHDRAWN', updated_at 기준) -->
+    <select id="countWithdrawnMembersInPeriod" parameterType="map" resultType="long">
+        SELECT COUNT(*)
+        FROM member
+        WHERE member_role = 'WITHDRAWN'
+          AND updated_at BETWEEN #{from} AND #{to}
+    </select>
 </mapper>
+	
+

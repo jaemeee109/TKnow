@@ -39,5 +39,6 @@ public class TicketResponseDTO {
     // 회차 스케줄 목록
     private List<TicketScheduleDTO> schedule;
 
-    
+    // 인기순 정렬을 위한 티켓별 총 매출(결제 완료 금액)
+    private Long totalPaidAmount;
 }

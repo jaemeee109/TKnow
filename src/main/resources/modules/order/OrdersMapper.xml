@@ -133,32 +133,40 @@
     LIMIT 1
   </select>
 
-     <!-- 5) 구매내역 목록(회원별, 페이징) -->
-    <select id="selectOrdersListByMember"
-            resultType="ticketnow.modules.order.dto.OrdersListItemDTO">
-      SELECT
-        /* 제목/장소/일시 */
-        t.ticket_title                             AS ticketTitle,
-        t.venueName                                AS ticketVenue,
+<!-- 5) 구매내역 목록(회원별, 페이징) -->
+<select id="selectOrdersListByMember"
+        parameterType="map"
+        resultType="ticketnow.modules.order.dto.OrdersListItemDTO">
+   SELECT
+        /* 주문 상태 (Admin / Member 공통으로 쓰기 위해 추가) */
+        o.orders_status                           AS ordersStatus,
+
+      /* 공연/티켓 정보 */
+        t.ticket_id                               AS ticketId,
+        t.ticket_title                            AS ticketTitle,
+        t.venueName                               AS venueName,
+        t.venueName                               AS ticketVenue,
         DATE_FORMAT(ts.show_at, '%Y-%m-%d')        AS ticketDate,
         DATE_FORMAT(ts.show_at, '%H:%i')           AS showStartTime,
+
         /* D-DAY 문구 */
         CONCAT('공연 ', GREATEST(DATEDIFF(ts.show_at, NOW()), 0), '일 전') AS ddayText,
-        /* 상세 이동용 주문ID */
-        o.orders_id                                AS ordersId
-      FROM orders o
-      JOIN order_ticket ot ON ot.orders_id = o.orders_id
-      JOIN seat s          ON s.seat_id    = ot.seat_id
-      JOIN ticket t        ON t.ticket_id  = s.ticket_id
-      JOIN ticket_schedule ts
-                           ON ts.ticket_id = t.ticket_id
-                          AND ts.round_no  = s.round_no
-      WHERE o.member_id = #{memberId}
-      GROUP BY o.orders_id
-      ORDER BY o.created_at DESC
-      LIMIT #{limit} OFFSET #{offset}
-    </select>
 
+        /* 상세 이동용 주문ID */
+        o.orders_id                               AS ordersId
+
+  FROM orders o
+  JOIN order_ticket ot ON ot.orders_id = o.orders_id
+  JOIN seat s          ON s.seat_id    = ot.seat_id
+  JOIN ticket t        ON t.ticket_id  = s.ticket_id
+  JOIN ticket_schedule ts
+                       ON ts.ticket_id = t.ticket_id
+                      AND ts.round_no  = s.round_no
+  WHERE o.member_id = #{memberId}
+  GROUP BY o.orders_id
+  ORDER BY o.created_at DESC
+  LIMIT #{limit} OFFSET #{offset}
+</select>
 
   <!-- 6) 목록 카운트 -->
   <select id="countOrdersByMember" resultType="long">
@@ -257,12 +265,23 @@
     FROM orders o
   </select>
 
+
   <!-- ======  주문 상태 변경 ====== -->
   <update id="updateOrdersStatus">
     UPDATE orders
     SET orders_status = #{ordersStatus}
     WHERE orders_id = #{ordersId}
   </update>
+
+  <!-- 주문 취소/환불 시: 해당 주문에 연결된 좌석들을 다시 AVAILABLE 로 되돌리기 -->
+  <update id="resetSeatStatusByOrdersId" parameterType="long">
+    UPDATE seat s
+    JOIN order_ticket ot ON ot.seat_id = s.seat_id
+    SET s.seat_status = 'AVAILABLE',
+        s.updated_at = NOW()
+    WHERE ot.orders_id = #{ordersId}
+  </update>
+
   
      <!-- 티켓 주문ID -> ticket_id (대표 1건) -->
    <select id="selectTicketIdByOrdersId" parameterType="long" resultType="long">

@@ -6,7 +6,7 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
 import ticketnow.modules.member.domain.MemberVO;
-
+import java.time.LocalDateTime;
 /**
  * Member 테이블 CRUD용 MyBatis Mapper
  * - SQL은 MemberMapper.xml에 작성 (annotation이 아닌 XML 매핑 방식)
@@ -31,4 +31,20 @@ public interface MemberMapper {
 
     // DELETE(소프트): deleted_at에 현재시간 기록
     int softDeleteMember(@Param("memberId") String memberId);
+    
+
+    // 최근 한 달 신규 가입 회원 수 (ROLE = 'USER')
+
+    long countNewMembersInPeriod(
+            @Param("from") LocalDateTime from,
+            @Param("to") LocalDateTime to
+    );
+
+
+    // 최근 한 달 탈퇴 회원 수 (ROLE = 'WITHDRAWN')
+
+    long countWithdrawnMembersInPeriod(
+            @Param("from") LocalDateTime from,
+            @Param("to") LocalDateTime to
+    );
 }

@@ -1,0 +1,336 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+
+<!--
+  - 테이블/컬럼은 db/schema.sql과 정확히 일치
+  - 언더스코어→카멜 자동매핑 활성화(mapUnderscoreToCamelCase=true)
+  - 날짜 포맷은 프론트 표시에 맞춰 SQL에서 문자열로 가공
+-->
+<mapper namespace="ticketnow.modules.order.mapper.OrdersMapper">
+
+  <!-- [공통 컬럼 조인 ]
+       orders o (orders_id, member_id, orders_total_amount, orders_ticket_quantity, orders_status)
+       order_ticket ot (order_ticket_id, orders_id, seat_id, order_price, order_quantity)
+       seat s (seat_id, ticket_id, seat_code, seat_status, seat_class, ...)
+       ticket t (ticket_id, ticket_title, ticket_date, ticket_price, ...)
+       member m (member_id, member_name, ...)
+       pay p (pay_id, orders_id, pay_method, pay_status, ...)
+  -->
+
+  <!-- 1) 주문 기본 정보 생성 (orders) -->
+  <insert id="insertOrders"
+          parameterType="ticketnow.modules.order.domain.OrdersVO"
+          useGeneratedKeys="true"
+          keyProperty="ordersId">
+    INSERT INTO orders
+      (member_id, orders_total_amount, orders_ticket_quantity, created_at, updated_at)
+    VALUES
+      (#{member.memberId}, #{ordersTotalAmount}, #{ordersTicketQuantity}, NOW(), NOW())
+  </insert>
+
+  <!-- 2) 주문-좌석 매핑  (order_ticket) -->
+  <insert id="insertOrderTicket">
+    INSERT INTO order_ticket
+      (orders_id, seat_id, order_price, order_quantity, created_at, updated_at)
+    VALUES
+      (#{ordersId}, #{seatId}, #{orderPrice}, #{orderQuantity}, NOW(), NOW())
+  </insert>
+
+
+
+
+  <!-- 3) 수령방법 선택 페이지: 주문/좌석/공연/회원 요약 -->
+   <select id="selectReceiveOptionPage"
+           parameterType="long"
+           resultType="ticketnow.modules.order.dto.receive.ReceiveOptionPageDTO">
+    SELECT
+      /* 공연 정보 (표시용) */
+      t.ticket_title     AS ticketTitle,
+      DATE_FORMAT(t.ticket_date, '%Y-%m-%d') AS ticketDate,
+      /* 기간/장소/등급/시작시간/러닝타임은 ticket 모듈 확정 전까지 표시문자열로 처리 */
+      NULL               AS ticketPeriod,
+      t.venueName AS venueName,
+      NULL               AS audienceGrade,
+      DATE_FORMAT(t.ticket_date, '%H:%i') AS showStartTime,
+      NULL               AS runningTime,
+
+      /* 예매 정보 */
+      s.seat_class       AS seatClass,
+      s.seat_code        AS seatCode,
+      NULL               AS seatNumber,  -- [표시용] seat_code에서 파생 가능
+      s.seat_id          AS seatId,
+      ot.order_price     AS ticketPrice,
+      0                  AS serviceFee,  -- [변경 가능] 정책 확정 전 임시 0
+      o.orders_ticket_quantity AS purchaseQty,
+      o.orders_total_amount    AS totalPayAmount,
+
+      /* 취소정책(표시용) */
+      NULL               AS cancelDeadlineText,
+      NULL               AS cancelFeePolicy,
+
+      /* 공통 */
+      o.orders_id        AS ordersId,
+      NOW()              AS generatedAt,
+
+      /* 회원 표시 정보 */
+      m.member_name      AS memberName,
+      DATE_FORMAT(m.member_birth, '%Y-%m-%d') AS memberBirth,
+      m.member_phone     AS memberPhone,
+      m.member_email     AS memberEmail
+
+    FROM orders o
+    JOIN order_ticket ot ON ot.orders_id = o.orders_id
+    JOIN seat s          ON s.seat_id    = ot.seat_id
+    JOIN ticket t        ON t.ticket_id  = s.ticket_id
+    JOIN member m        ON m.member_id  = o.member_id
+    WHERE o.orders_id = #{ordersId}
+    /* 여러 좌석이 연결된 주문이라면 1건만 대표로 노출 */
+    ORDER BY ot.order_ticket_id ASC
+    LIMIT 1
+  </select>
+
+  <!-- 4) 결제하기 페이지: 수령 이후 결제 직전 화면 요약 -->
+   <select id="selectPayPage"
+           parameterType="long"
+           resultType="ticketnow.modules.order.dto.pay.PayPageDTO">
+    SELECT
+      /* 공연 정보 (표시용) */
+      t.ticket_title     AS ticketTitle,
+      DATE_FORMAT(t.ticket_date, '%Y-%m-%d') AS ticketDate,
+      NULL               AS ticketPeriod,
+      t.venueName AS ticketVenue,
+      NULL               AS audienceGrade,
+      DATE_FORMAT(t.ticket_date, '%H:%i') AS showStartTime,
+      NULL               AS runningTime,
+
+      /* 예매 정보 */
+      s.seat_class       AS seatClass,
+      s.seat_code        AS seatCode,
+      NULL               AS seatNumber,
+      s.seat_id          AS seatId,
+      ot.order_price     AS ticketPrice,
+      0                  AS serviceFee,  -- [변경 가능]
+      o.orders_ticket_quantity AS purchaseQty,
+      o.orders_total_amount    AS totalPayAmount,
+
+      /* 취소정책(표시용) */
+      NULL               AS cancelDeadlineText,
+      NULL               AS cancelFeePolicy,
+
+      /* 공통 */
+      o.orders_id        AS ordersId,
+      NOW()              AS generatedAt
+
+    FROM orders o
+    JOIN order_ticket ot ON ot.orders_id = o.orders_id
+    JOIN seat s          ON s.seat_id    = ot.seat_id
+    JOIN ticket t        ON t.ticket_id  = s.ticket_id
+    WHERE o.orders_id = #{ordersId}
+    ORDER BY ot.order_ticket_id ASC
+    LIMIT 1
+  </select>
+
+<!-- 5) 구매내역 목록(회원별, 페이징) -->
+<select id="selectOrdersListByMember"
+        parameterType="map"
+        resultType="ticketnow.modules.order.dto.OrdersListItemDTO">
+   SELECT
+        /* 주문 상태 (Admin / Member 공통으로 쓰기 위해 추가) */
+        o.orders_status                           AS ordersStatus,
+
+      /* 공연/티켓 정보 */
+        t.ticket_id                               AS ticketId,
+        t.ticket_title                            AS ticketTitle,
+        t.venueName                               AS venueName,
+        t.venueName                               AS ticketVenue,
+        DATE_FORMAT(ts.show_at, '%Y-%m-%d')        AS ticketDate,
+        DATE_FORMAT(ts.show_at, '%H:%i')           AS showStartTime,
+
+        /* D-DAY 문구 */
+        CONCAT('공연 ', GREATEST(DATEDIFF(ts.show_at, NOW()), 0), '일 전') AS ddayText,
+
+        /* 상세 이동용 주문ID */
+        o.orders_id                               AS ordersId
+
+  FROM orders o
+  JOIN order_ticket ot ON ot.orders_id = o.orders_id
+  JOIN seat s          ON s.seat_id    = ot.seat_id
+  JOIN ticket t        ON t.ticket_id  = s.ticket_id
+  JOIN ticket_schedule ts
+                       ON ts.ticket_id = t.ticket_id
+                      AND ts.round_no  = s.round_no
+  WHERE o.member_id = #{memberId}
+  GROUP BY o.orders_id
+  ORDER BY o.created_at DESC
+  LIMIT #{limit} OFFSET #{offset}
+</select>
+
+  <!-- 6) 목록 카운트 -->
+  <select id="countOrdersByMember" resultType="long">
+    SELECT COUNT(DISTINCT o.orders_id)
+    FROM orders o
+    JOIN order_ticket ot ON ot.orders_id = o.orders_id
+    WHERE o.member_id = #{memberId}
+  </select>
+
+
+    <!-- 7) 구매내역 상세 -->
+  <select id="selectOrdersDetail"
+          parameterType="long"
+          resultType="ticketnow.modules.order.dto.OrdersDetailDTO">
+    SELECT
+      /* 기본 */
+      o.orders_id            AS ordersId,
+      ot.order_ticket_id     AS orderTicketId,
+
+      /* 공연/티켓 */
+      t.ticket_title         AS ticketTitle,
+      DATE_FORMAT(t.ticket_date, '%Y-%m-%d') AS ticketDate,
+      DATE_FORMAT(t.ticket_date, '%H:%i')    AS showStartTime,
+      t.venueName AS ticketVenue,
+
+      s.seat_class           AS seatClass,
+      s.seat_code            AS seatCode,
+      NULL                   AS seatNumber,
+      s.seat_id              AS seatId,
+
+      /* 수령방법/모바일티켓(표시용) */
+      NULL                   AS deliveryMethod,
+      NULL                   AS qrImageUrl,
+      NULL                   AS qrCodeNumber,
+
+      /* 결제/정산 */
+      o.orders_status          AS ordersStatus,
+      p.pay_status             AS payStatus,
+      p.pay_method             AS payMethod,
+      ot.order_price           AS ticketPrice,
+      0                        AS serviceFee,          -- [변경 가능]
+      o.orders_ticket_quantity AS quantity,
+      o.orders_total_amount    AS totalPayAmount,
+
+      /* 취소정책(표시용) */
+      /* 예: 관람일 기준 계산이 필요하면 Service에서 계산/주입 */
+      /* DB에는 정책컬럼이 없으므로 NULL 반환 */
+      0                      AS cancelable,          -- Service에서 boolean 계산 가능
+      NULL                   AS cancelDeadline,
+      NULL                   AS cancelFeePeriodText,
+
+      /* 시간 */
+      o.created_at           AS createdAt,
+      o.updated_at           AS updatedAt,
+
+      /* 회원 표시 정보 */
+      m.member_name  AS memberName,
+      m.member_phone AS memberPhone,
+      m.member_email AS memberEmail
+
+    FROM orders o
+    JOIN order_ticket ot ON ot.orders_id = o.orders_id
+    JOIN seat s          ON s.seat_id    = ot.seat_id
+    JOIN ticket t        ON t.ticket_id  = s.ticket_id
+    JOIN member m        ON m.member_id  = o.member_id
+    LEFT JOIN pay p      ON p.orders_id  = o.orders_id
+    WHERE o.orders_id = #{ordersId}
+    ORDER BY ot.order_ticket_id ASC
+    LIMIT 1
+  </select>
+
+   <!-- ====== 관리자용 전체 주문 목록 (페이징) ====== -->
+  <select id="selectAdminOrdersList"
+          resultType="ticketnow.modules.order.dto.admin.AdminOrdersListItemDTO">
+    SELECT
+      o.orders_id AS ordersId,
+      DATE_FORMAT(o.created_at, '%Y-%m-%d %H:%i') AS orderDate,
+      t.ticket_title AS ticketTitle,
+      SUM(ot.order_quantity) AS ticketQuantity,
+      o.orders_total_amount AS totalAmount,
+      o.orders_status AS ordersStatus,
+      p.pay_status AS payStatus
+    FROM orders o
+    JOIN order_ticket ot ON ot.orders_id = o.orders_id
+    JOIN seat s          ON s.seat_id    = ot.seat_id
+    JOIN ticket t        ON t.ticket_id  = s.ticket_id
+    LEFT JOIN pay p      ON p.orders_id  = o.orders_id
+    GROUP BY o.orders_id
+    ORDER BY o.created_at DESC
+    LIMIT #{limit} OFFSET #{offset}
+  </select>
+
+  <!-- ======  관리자용 전체 주문 카운트 ====== -->
+  <select id="countAdminOrders" resultType="long">
+    SELECT COUNT(DISTINCT o.orders_id)
+    FROM orders o
+  </select>
+
+
+  <!-- ======  주문 상태 변경 ====== -->
+  <update id="updateOrdersStatus">
+    UPDATE orders
+    SET orders_status = #{ordersStatus}
+    WHERE orders_id = #{ordersId}
+  </update>
+
+  <!-- 주문 취소/환불 시: 해당 주문에 연결된 좌석들을 다시 AVAILABLE 로 되돌리기 -->
+  <update id="resetSeatStatusByOrdersId" parameterType="long">
+    UPDATE seat s
+    JOIN order_ticket ot ON ot.seat_id = s.seat_id
+    SET s.seat_status = 'AVAILABLE',
+        s.updated_at = NOW()
+    WHERE ot.orders_id = #{ordersId}
+  </update>
+
+  
+     <!-- 티켓 주문ID -> ticket_id (대표 1건) -->
+   <select id="selectTicketIdByOrdersId" parameterType="long" resultType="long">
+     SELECT s.ticket_id
+     FROM orders o
+     JOIN order_ticket ot ON ot.orders_id = o.orders_id
+     JOIN seat s          ON s.seat_id    = ot.seat_id
+     WHERE o.orders_id = #{ordersId}
+     ORDER BY ot.order_ticket_id ASC
+     LIMIT 1
+   </select>
+  
+    <!-- 8) 관리자용 전체 매출 요약 (AdminInven 통계용)
+       - 판매 티켓 수량 / 판매액 : orders_status = 'PAID'
+       - 환불 금액 : orders_status = 'REFUNDED'
+  -->
+  <select id="selectAdminSalesSummary"
+          resultType="ticketnow.modules.order.dto.admin.AdminSalesSummaryDTO">
+    SELECT
+      COALESCE(
+        SUM(
+          CASE
+            WHEN o.orders_status = 'PAID'
+              THEN o.orders_ticket_quantity
+            ELSE 0
+          END
+        ), 0
+      ) AS totalTicketQuantity,
+      COALESCE(
+        SUM(
+          CASE
+            WHEN o.orders_status = 'PAID'
+              THEN o.orders_total_amount
+            ELSE 0
+          END
+        ), 0
+      ) AS totalSalesAmount,
+      COALESCE(
+        SUM(
+          CASE
+            WHEN o.orders_status = 'REFUNDED'
+              THEN o.orders_total_amount
+            ELSE 0
+          END
+        ), 0
+      ) AS totalRefundAmount
+    FROM orders o
+  </select>
+
+  
+
+</mapper>

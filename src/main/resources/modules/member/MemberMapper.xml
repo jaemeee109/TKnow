@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="ticketnow.modules.member.mapper.MemberMapper">
+
+	<!-- 공통 컬럼 -->
+	<sql id="columns">
+		member_id, member_pw, member_name, member_birth,
+		member_phone, member_email, member_zip, member_addr1, member_addr2,
+		member_grade, member_role, deleted_at, created_at, updated_at
+	</sql>
+
+	<!-- CREATE -->
+	<!-- INSERT: 타임스탬프/삭제표시는 DB에 맡기고, role은 기본값 'USER' 보장 -->
+	<insert id="insertMember"
+		parameterType="ticketnow.modules.member.domain.MemberVO">
+		INSERT INTO member (
+		member_id, member_pw, member_name, member_birth,
+		member_phone, member_email, member_zip, member_addr1, member_addr2,
+		member_grade, member_role
+		)
+		VALUES (
+		#{memberId}, #{memberPw}, #{memberName}, #{memberBirth},
+		#{memberPhone}, #{memberEmail}, #{memberZip}, #{memberAddr1}, #{memberAddr2},
+		#{memberGrade},
+		COALESCE(#{memberRole}, 'USER')   <!-- ★ NULL이면 USER로 강제 -->
+		)
+	</insert>
+
+	<!-- READ: 단건 -->
+	<select id="selectMemberById" parameterType="string"
+		resultType="ticketnow.modules.member.domain.MemberVO">
+		SELECT
+		<include refid="columns" />
+		FROM member
+		WHERE member_id = #{memberId}
+	</select>
+
+	<!-- READ: 페이지 목록 -->
+	<!-- 주의: Mapper 인터페이스에서 @Param("offset"), @Param("limit")로 이름 일치 필요 -->
+	<select id="selectMemberPage"
+		resultType="ticketnow.modules.member.domain.MemberVO">
+		SELECT
+		<include refid="columns" />
+		FROM member
+		ORDER BY created_at DESC
+		LIMIT #{limit} OFFSET #{offset}
+	</select>
+
+	<!-- READ: 카운트 -->
+	<select id="countMembers" resultType="long">
+		SELECT COUNT(*) FROM member
+	</select>
+
+	<!-- UPDATE -->
+	<update id="updateMember"
+		parameterType="ticketnow.modules.member.domain.MemberVO">
+		UPDATE member
+		SET member_pw = #{memberPw},
+		member_name =
+		#{memberName},
+		member_phone= #{memberPhone},
+		member_email=
+		#{memberEmail},
+		member_zip = #{memberZip},
+		member_addr1= #{memberAddr1},
+		member_addr2= #{memberAddr2},
+		member_grade= #{memberGrade},
+		member_role
+		= #{memberRole},
+		updated_at = #{updatedAt}
+		WHERE member_id = #{memberId}
+	</update>
+
+	<!-- SOFT DELETE -->
+	<update id="softDeleteMember" parameterType="string">
+		UPDATE member
+		SET
+		deleted_at = NOW(),
+		updated_at = NOW()
+		WHERE member_id = #{memberId}
+	</update>
+	
+	    <!-- ==================== 관리자 대시보드용 회원 통계 ==================== -->
+
+    <!-- 최근 한 달 신규 가입 회원 수 (ROLE = 'USER') -->
+    <select id="countNewMembersInPeriod" parameterType="map" resultType="long">
+        SELECT COUNT(*)
+        FROM member
+        WHERE member_role = 'USER'
+          AND deleted_at IS NULL
+          AND created_at BETWEEN #{from} AND #{to}
+    </select>
+
+    <!-- 최근 한 달 탈퇴 회원 수 (ROLE = 'WITHDRAWN', updated_at 기준) -->
+    <select id="countWithdrawnMembersInPeriod" parameterType="map" resultType="long">
+        SELECT COUNT(*)
+        FROM member
+        WHERE member_role = 'WITHDRAWN'
+          AND updated_at BETWEEN #{from} AND #{to}
+    </select>
+</mapper>
+	
+

@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="ticketnow.modules.common.mapper.image.ImageMapper">
+
+  <!--
+    - 전역 설정(mapUnderscoreToCamelCase=true)로 snake_case → camelCase 자동 매핑
+    - 테이블명/컬럼명은 schema.sql과 정확히 일치해야 합니다.
+  -->
+
+    <insert id="insertImage" parameterType="ticketnow.modules.common.domain.ImageVO">
+    INSERT INTO image
+      (img_uuid, img_ext, orgin_name, file_name, img_url, img_type, img_sort, is_primary,
+       board_id, member_id, ticket_id, reply_id, created_at, updated_at)
+    VALUES
+      (#{imageUuid}, #{imageExt}, #{orginName}, #{fileName}, #{imgUrl}, #{imageType},
+       #{imageSort}, #{isPrimary},
+       #{board.boardId}, #{member.memberId}, #{ticket.ticketId}, #{reply.replyId}, NOW(), NOW())
+  </insert>
+
+
+  <update id="updateImageMeta" parameterType="ticketnow.modules.common.domain.ImageVO">
+  UPDATE image
+  <set>
+    is_primary = CASE WHEN #{isPrimary} IS NULL THEN 0 ELSE #{isPrimary} END,
+    <if test="imgSort != null">
+      img_sort = #{imgSort},
+    </if>
+    <if test="imgType != null">
+      img_type = #{imgType},
+    </if>
+    updated_at = NOW()
+  </set>
+  WHERE img_uuid = #{imgUuid}
+</update>
+
+  <delete id="deleteImageByUuid">
+    DELETE FROM image WHERE img_uuid = #{imageUuid}
+  </delete>
+
+  <select id="selectImagesByBoard" resultType="ticketnow.modules.common.domain.ImageVO">
+    SELECT *
+      FROM image
+     WHERE board_id = #{boardId}
+     ORDER BY is_primary DESC, img_sort ASC, created_at ASC
+  </select>
+
+  <select id="selectImagesByMember" resultType="ticketnow.modules.common.domain.ImageVO">
+    SELECT *
+      FROM image
+     WHERE member_id = #{memberId}
+     ORDER BY is_primary DESC, img_sort ASC, created_at ASC
+  </select>
+
+<select id="selectImagesByTicket" resultType="ticketnow.modules.common.domain.ImageVO">
+  SELECT
+    img_uuid    AS imageUuid,
+    img_ext     AS imageExt,
+    orgin_name  AS orginName,
+    file_name   AS fileName,
+    img_url     AS imgUrl,
+    img_type    AS imageType,
+    img_sort    AS imageSort,
+    is_primary  AS isPrimary,
+    created_at  AS createdAt,
+    updated_at  AS updatedAt
+  FROM image
+  WHERE ticket_id = #{ticketId}
+    AND img_type = 'TICKET_IMAGE'
+  ORDER BY img_sort ASC, created_at ASC
+</select>
+
+  
+    <select id="selectImagesByReply" resultType="ticketnow.modules.common.domain.ImageVO">
+    SELECT * FROM image
+     WHERE reply_id = #{replyId}
+     ORDER BY is_primary DESC, img_sort ASC, created_at ASC
+  </select>
+
+  <select id="selectPrimaryImageByTicket" resultType="ticketnow.modules.common.domain.ImageVO">
+  SELECT
+    img_uuid    AS imageUuid,
+    img_ext     AS imageExt,
+    orgin_name  AS orginName,
+    file_name   AS fileName,
+    img_url     AS imgUrl,
+    img_type    AS imageType,
+    img_sort    AS imageSort,
+    is_primary  AS isPrimary,
+    created_at  AS createdAt,
+    updated_at  AS updatedAt
+  FROM image
+  WHERE ticket_id = #{ticketId}
+    AND img_type = 'TICKET_IMAGE'
+    AND is_primary = 1
+  ORDER BY img_sort ASC, created_at ASC
+  LIMIT 1
+</select>
+
+
+</mapper>

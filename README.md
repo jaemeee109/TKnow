@@ -12,6 +12,7 @@
 <p/> <b>이재은</b>
 <p/> - 백엔드 : Database·VO 설계, 공통(Image,Paging), Auth(JWT), Board , Order,Pay 모듈
 <p/> - 프론트엔드 : React
+<p/> - 배포 : AWS EC2
 <p/> <b>전혜진</b>
 <p/> - 웹디자인 Figma
 <p/> <b>박희진</b>

@@ -5,6 +5,16 @@ import "../css/style.css";
 import { useNavigate, Link, useLocation } from "react-router-dom";
 import api from "../api";
 
+// api baseURL 기준으로 이미지 URL 만들기
+const BASE_URL = (api.defaults.baseURL || "").replace(/\/$/, "");
+
+const resolveImageUrl = (path) => {
+  if (!path) return "";
+  if (path.startsWith("http://") || path.startsWith("https://")) return path;
+  if (path.startsWith("/")) return `${BASE_URL}${path}`;
+  return `${BASE_URL}/${path}`;
+};
+
 const PAGE_SIZE = 20; // 한 페이지당 상품 20개
 
 export default function List() {
@@ -249,16 +259,17 @@ useEffect(() => {
                   navigate(`/ticket/${t.ticketId}`);
                 }}
               >
-                <img
-                  src={t.mainImageUrl || "/default.jpg"}
-                  alt={t.title || "티켓 이미지"}
-                  className={
-                    "ticket-img" +
-                    (normalizeStatus(t.ticketStatus) === "CLOSED"
-                      ? " ticket-img-closed"
-                      : "")
-                  }
-                />
+               <img
+  src={resolveImageUrl(t.mainImageUrl) || "/default.jpg"}
+  alt={t.title || "티켓 이미지"}
+  className={
+    "ticket-img" +
+    (normalizeStatus(t.ticketStatus) === "CLOSED"
+      ? " ticket-img-closed"
+      : "")
+  }
+/>
+
                 <p />
                 <strong>{t.title}</strong>
                 <p />

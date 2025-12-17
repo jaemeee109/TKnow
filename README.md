@@ -1,6 +1,6 @@
 # TKnow
 티켓 예매 사이트  Team Project
-<p/>2025.10.17~ing
+<p/>2025.10.17~2025.12.17
 
 # TKnow Git Flow Guide
 <p/>프로젝트명: <TicketNow>
